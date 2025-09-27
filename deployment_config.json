@@ -1,0 +1,45 @@
+{
+  "deployment": {
+    "platform": "google_apps_script",
+    "version": "1.0.0",
+    "environment": "production",
+    "webapp": {
+      "access": "ANYONE",
+      "executeAs": "USER_ACCESSING"
+    },
+    "triggers": {
+      "time_based": {
+        "enabled": true,
+        "frequency": "daily",
+        "time": "06:00"
+      },
+      "manual": {
+        "enabled": true,
+        "functions": [
+          "runAgriSwarmWorkflow",
+          "runAllTests",
+          "runSmokeTests"
+        ]
+      }
+    },
+    "permissions": {
+      "scopes": [
+        "https://www.googleapis.com/auth/drive",
+        "https://www.googleapis.com/auth/spreadsheets",
+        "https://www.googleapis.com/auth/gmail.send",
+        "https://www.googleapis.com/auth/script.external_request",
+        "https://www.googleapis.com/auth/userinfo.email"
+      ]
+    }
+  },
+  "rollback": {
+    "strategy": "version_control",
+    "backup_required": true,
+    "steps": [
+      "Archive current deployment logs",
+      "Deploy previous stable version",
+      "Verify system functionality",
+      "Restore data if needed"
+    ]
+  }
+}

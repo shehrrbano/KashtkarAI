@@ -1,0 +1,20 @@
+# AgriSwarm Requirements - Google Apps Script Project
+# This project uses Google Apps Script as a free alternative to Vertex AI
+
+# Core Google Services (no installation required in Apps Script)
+# - Google Drive API v3
+# - Google Sheets API v4
+# - Gmail API v1
+# - Google Apps Script runtime V8
+
+# Local development dependencies (for testing outside Apps Script)
+# Uncomment for local development
+# google-api-python-client==2.100.0
+# google-auth-oauthlib==1.0.0
+# google-auth-httplib2==0.1.0
+
+# Project Structure:
+# - Google Apps Script handles all agent logic
+# - Google Drive for data storage
+# - Google Sheets for data processing
+# - Gmail for notifications

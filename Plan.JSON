@@ -1,0 +1,392 @@
+{
+  "scoped_design": {
+  "objective": "Develop and deploy a prototype of AgriSwarm, an autonomous
+  multi-agent swarm system for AgriTech in Pakistan, using Vertex AI for agent
+  orchestration, Google Earth Engine for geospatial and satellite data, BigQuery
+  for data processing, and other Google services to enable agent-to-agent economy
+  for crop optimization, precision irrigation, and advisory services. The system
+  should simulate agent interactions (Sensor, Prediction, Resource, Market Agents)
+  with autonomy, ethical safeguards, and a degraded offline mode.",
+  "min_success_criteria": [
+  "Deployed Vertex AI endpoint or agent that handles a simulated workflow: data
+  collection, prediction, negotiation, and market recommendation.",
+  "Integration with Google Earth Engine for satellite data (e.g., NDVI for crop
+  health).",
+  "Basic agent negotiation demo using Vertex AI agentic flows.",
+  "Smoke tests for 3 scenarios: irrigation allocation, pest prediction, market
+  advice.",
+  "All components use only Google-owned services; replace non-Google APIs (e.g.,
+  OpenWeatherMap) with Earth Engine datasets or mocks.",
+  "Complete within 240 minutes, with citations to official Google docs."
+  ],
+  "google_services_required": [
+  "Vertex AI (for agents, ML models, Gemini LLMs)",
+  "Google Earth Engine (for satellite imagery, NDVI, soil analysis)",
+  "BigQuery (for data processing and storage)",
+  "Google Cloud Storage (GCS) (for memory, logs, cached data)",
+  "Artifact Registry (for container images)",
+  "Cloud Build (for CI/CD)",
+  "Cloud Source Repositories (for code hosting)",
+  "Secret Manager (for secrets)",
+  "IAM & Service Accounts (for permissions)",
+  "Cloud Logging (for logs)",
+  "Cloud Monitoring (for alerts)",
+  "Google Maps Platform (for location-based recommendations)",
+  "Cloud Pub/Sub (for agent messaging if needed)"
+  ],
+  "required_inputs": [
+  "GCP_PROJECT_ID",
+  "REGION",
+  "GCP_BILLING_ENABLED",
+  "SERVICE_ACCOUNT_EMAIL"
+  ],
+  "risks_and_mitigations": [
+  "Non-Google APIs in research plan (e.g., OpenWeatherMap, Stormglass):
+  Mitigate by using Earth Engine historical/climate datasets or mocks; mark
+  VERIFY if real-time forecasts unavailable.",
+  1
+ "API quotas/limits: Use mock data for development; cite quota docs and
+  monitor via Cloud Monitoring.",
+  "Timebox overrun: Fallback to minimal agent simulation without full blockchain
+  (use Pub/Sub for transactions).",
+  "Offline mode: Implement basic rule-based caching in GCS; full IoT simulation
+  out of scope.",
+  "Costs: Use free tiers where possible; alert on budget via Monitoring."
+  ]
+  },
+  "execution_prompts": [
+  {
+  "id": "02-project-setup-iam",
+  "title": "GCP Project + APIs + IAM service accounts",
+  "time_minutes": 20,
+  "inputs_required": [
+  "GCP_PROJECT_ID",
+  "REGION"
+  ],
+  "task_prompt": {
+  "system_instructions": "You are a Google Cloud operator bot. Timebox: 20
+  minutes. Use gcloud commands and cite Google docs. Ensure setup supports
+  Vertex AI agents, Earth Engine, BigQuery, and related services for AgriSwarm
+  prototype.",
+  "user_task": "Produce machine-executable commands: (1) Verify billing
+  with 'gcloud beta billing projects describe $GCP_PROJECT_ID'. (2)
+  Enable APIs: gcloud services enable aiplatform.googleapis.com artifactreg
+ istry.googleapis.com cloudbuild.googleapis.com sourcerepo.googleapis.com
+  secretmanager.googleapis.com storage-api.googleapis.com pubsub.googleapis.com
+  iam.googleapis.com
+  bigquery.googleapis.com
+  earthengine.googleapis.com
+  mapsplatform.googleapis.com. (3) Create service accounts: e.g., 'agriswarm
+ builder@' for Cloud Build (roles: cloudbuild.builds.editor, artifactregistry.writer),
+  'agriswarm-runtime@' for Vertex AI (roles: aiplatform.user, earthengine.reader,
+  bigquery.dataEditor). (4) Output environment variables and verify checklist.",
+  "output_schema": {
+  "project_setup.sh": "array of command strings",
+  "service_accounts_manifest.json": {
+  "name": "string",
+  "roles": "array",
+  "description": "string"
+  },
+  "verify_project_setup.json": {
+  "project_id": "string",
+  "billing_enabled": "boolean",
+  "enabled_apis": "array"
+  }
+  }
+  2
+ },
+  "expected_artifacts": [
+  "project_setup.sh",
+  "service_accounts_manifest.json",
+  "verify_project_setup.json"
+  ],
+  "citations": [
+  "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development
+ kit/quickstart",
+  "https://cloud.google.com/sdk/gcloud/reference/services/enable",
+  "https://cloud.google.com/iam/docs/service-accounts-create",
+  "https://cloud.google.com/billing/docs/how-to/verify-billing-enabled"
+  ]
+  },
+  {
+  "id": "03-code-hosting-scaffold",
+  "title": "Create Cloud Source Repo + code scaffold",
+  "time_minutes": 15,
+  "inputs_required": [
+  "GCP_PROJECT_ID"
+  ],
+  "task_prompt": {
+  "system_instructions": "Only Cloud Source Repositories and gcloud git methods.
+  Timebox: 15 minutes. Scaffold for AgriSwarm: include directories for agents
+  (sensor, prediction, resource, market).",
+  "user_task": "Produce commands: (1) gcloud source repos create agriswarm-repo--project=$GCP_PROJECT_ID. (2) Scaffold: mkdir-p src/agents tests docs
+  infra; create requirements.txt with google-cloud-aiplatform google-earthengine
+ api google-cloud-bigquery; CITATIONS.md template; README.md with
+  AgriSwarm overview referencing Google docs. (3) git init, add, commit, gcloud
+  source repos clone agriswarm-repo, git push.",
+  "output_schema": {
+  "repo_url": "string",
+  "initial_commit_sha": "string"
+  }
+  },
+  "expected_artifacts": [
+  "repo_url",
+  "initial_commit_sha"
+  ],
+  "citations": [
+  "https://cloud.google.com/source-repositories/docs/creating-a-repository",
+  "https://cloud.google.com/source-repositories/docs/cloning-repositories"
+  ]
+  },
+  {
+  3
+ "id": "04-infra-storage-secrets",
+  "title": "Artifact Registry + GCS buckets + Secret Manager",
+  "time_minutes": 15,
+  "inputs_required": [
+  "GCP_PROJECT_ID",
+  "REGION"
+  ],
+  "task_prompt": {
+  "system_instructions": "Timebox: 15 minutes. Use only Artifact Registry, GCS,
+  Secret Manager for AgriSwarm data (e.g., cached sensor data).",
+  "user_task": "Produce commands: (1) gcloud artifact repositories create
+  agriswarm-artifacts--repository-format=docker--location=$REGION. (2)
+  gsutil mb-l $REGION gs://agriswarm-memory/ gs://agriswarm-logs/. (3)
+  gcloud secrets create agriswarm-api-keys--replication-policy='{\"automatic\":
+  {}}'.
+  (4) IAM bindings: e.g., gsutil iam ch serviceAccount:agriswarm
+ runtime@$GCP_PROJECT_ID.iam.gserviceaccount.com:objectAdmin
+  gs://agriswarm-memory/.",
+  "output_schema": {
+  "artifact_repo_name": "string",
+  "gcs_bucket_uris": "array",
+  "secrets_list": "array"
+  }
+  },
+  "expected_artifacts": [
+  "artifact_repo_name",
+  "gcs_bucket_uris",
+  "secrets_list"
+  ],
+  "citations": [
+  "https://cloud.google.com/artifact-registry/docs/repositories/create-repos",
+  "https://cloud.google.com/storage/docs/creating-buckets",
+  "https://cloud.google.com/secret-manager/docs/creating-and-accessing
+ secrets",
+  "https://cloud.google.com/storage/docs/access-control/iam"
+  ]
+  },
+  {
+  "id": "05-core-agent-implementation",
+  "title":
+  "Implement core code: authentication, Vertex AI client, plan
+ ner/executor/memory",
+  "time_minutes": 60,
+  "inputs_required": [
+  "GCP_PROJECT_ID",
+  "REGION",
+  "SERVICE_ACCOUNT_JSON_SECRET_NAME"
+  ],
+  4
+ "task_prompt": {
+  "system_instructions": "Timebox: 60 minutes. Use google-cloud-aiplatform SDK
+  and ADK patterns. Implement AgriSwarm agents: Sensor (Earth Engine data),
+  Prediction (Gemini ML), Resource (negotiation), Market (Maps). Use GCS for
+  memory. Replace non-Google APIs with Earth Engine mocks.",
+  "user_task": "Produce files: src/main.py (init Vertex AI, orchestrate agents),
+  src/agents/sensor.py (Earth Engine NDVI), src/agents/prediction.py (Gemini
+  forecast), src/agents/resource.py (Pub/Sub negotiation), src/agents/market.py
+  (Maps recommendations), src/memory_gcs.py (persist to GCS), requirements.txt
+  (google-cloud-aiplatform\\nearthengine-api\\ngoogle-cloud-bigquery\\ngoogle
+ cloud-pubsub\\ngooglemaps), tests/unit_tests.py. Include code snippets
+  for auth: from google.oauth2 import service_account; credentials = ser
+ vice_account.Credentials.from_service_account_file(...).",
+  "output_schema": {
+  "files": [
+  {
+  "path": "string",
+  "content": "string"
+  }
+  ]
+  }
+  },
+  "expected_artifacts": [
+  "src/*.py",
+  "tests/*.py",
+  "requirements.txt"
+  ],
+  "citations": [
+  "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development
+ kit/quickstart",
+  "https://cloud.google.com/python/docs/reference/aiplatform/latest",
+  "https://developers.google.com/earth-engine/guides/python_install",
+  "https://cloud.google.com/bigquery/docs/reference/libraries",
+  "https://cloud.google.com/pubsub/docs/reference/libraries"
+  ]
+  },
+  {
+  "id": "06-local-tests-and-smoke",
+  "title": "Run pytest, local scenario and mocked API flows",
+  "time_minutes": 20,
+  "inputs_required": [],
+  "task_prompt": {
+  "system_instructions": "Timebox: 20 minutes. Use pytest. Mock Vertex AI
+  and Earth Engine calls for AgriSwarm scenarios (e.g., pest prediction, water
+  allocation).",
+  "user_task":
+  "Produce: pytest commands (pip install pytest; pytest
+  5
+ tests/), test cases for agents (e.g., test_sensor_data_fetch mocks NDVI),
+  smoke_test_log.json with 3 queries: 'Predict pest risk', 'Allocate water',
+  'Recommend market' + outputs.",
+  "output_schema": {
+  "pytest_report.json": "object",
+  "smoke_test_log.json": "object"
+  }
+  },
+  "expected_artifacts": [
+  "pytest_report.json",
+  "smoke_test_log.json"
+  ],
+  "citations": [
+  "https://cloud.google.com/vertex-ai/generative-ai/docs/testing-agents",
+  "https://docs.pytest.org/en/stable/"
+  ]
+  },
+  {
+  "id": "07-containerize-build-push",
+  "title": "Containerize code, Cloud Build pipeline, push to Artifact Registry",
+  "time_minutes": 20,
+  "inputs_required": [
+  "GCP_PROJECT_ID",
+  "REGION"
+  ],
+  "task_prompt": {
+  "system_instructions": "Timebox: 20 minutes. Use Cloud Build and Artifact
+  Registry only for AgriSwarm container.",
+  "user_task": "Produce: Dockerfile (FROM python:3.12, COPY src/, pip install-r requirements.txt, CMD python src/main.py), cloudbuild.yaml (steps: build
+  docker, push to Artifact Registry), commands: gcloud builds submit--config
+  cloudbuild.yaml. Verify: gcloud artifacts docker images list.",
+  "output_schema": {
+  "Dockerfile": "string",
+  "cloudbuild.yaml": "string",
+  "artifact_url": "string"
+  }
+  },
+  "expected_artifacts": [
+  "Dockerfile",
+  "cloudbuild.yaml",
+  "artifact_url"
+  ],
+  "citations": [
+  "https://cloud.google.com/cloud-build/docs/build-config-file-schema",
+  "https://cloud.google.com/artifact-registry/docs/docker/store-docker
+ 6
+ container-images"
+  ]
+  },
+  {
+  "id": "08-deploy-to-vertex",
+  "title": "Deploy container/code to Vertex AI agent or endpoint",
+  "time_minutes": 40,
+  "inputs_required": [
+  "GCP_PROJECT_ID",
+  "REGION",
+  "artifact_url"
+  ],
+  "task_prompt": {
+  "system_instructions": "Timebox: 40 minutes. Use Vertex AI ADK quickstart.
+  If quota issues, mark VERIFY with docs.",
+  "user_task": "Produce: gcloud ai endpoints create--project=$GCP_PROJECT_ID--region=$REGION--display-name=agriswarm-endpoint; upload model/container:
+  gcloud ai models upload--container-image-uri=$artifact_url; deploy: gcloud ai
+  endpoints deploy-model. Test: curl endpoint with sample queries. Rollback:
+  gcloud ai endpoints undeploy-model.",
+  "output_schema": {
+  "deployment_manifest.yaml": "string",
+  "endpoint_test_commands.sh": "string",
+  "rollback_instructions.md": "string"
+  }
+  },
+  "expected_artifacts": [
+  "deployment_manifest.yaml",
+  "endpoint_test_commands.sh",
+  "rollback_instructions.md"
+  ],
+  "citations": [
+  "https://cloud.google.com/vertex-ai/generative-ai/docs/agent-development
+ kit/quickstart",
+  "https://cloud.google.com/vertex-ai/docs/general/deployment"
+  ]
+  },
+  {
+  "id": "09-monitoring-logging-cicd",
+  "title": "Set up Logging, Monitoring, Alerts and a basic CI/CD acceptance gate",
+  "time_minutes": 20,
+  "inputs_required": [
+  "GCP_PROJECT_ID"
+  ],
+  "task_prompt": {
+  "system_instructions": "Timebox: 20 minutes. Use Cloud Monitoring, Cloud
+  7
+ Logging, and Cloud Build gating for AgriSwarm.",
+  "user_task": "Produce: Logging sink: gcloud logging sinks create agriswarm-sink
+  storage.googleapis.com/$gcs_bucket_logs; Monitoring uptime check: gcloud
+  alpha monitoring policies create--policy-from-file=uptime_policy.json (define
+  policy for endpoint). Update cloudbuild.yaml to run pytest and fail on errors.
+  SLO: 99% uptime.",
+  "output_schema": {
+  "monitoring_policy.json": "object",
+  "cloudbuild_with_tests.yaml": "string"
+  }
+  },
+  "expected_artifacts": [
+  "monitoring_policy.json",
+  "cloudbuild_with_tests.yaml"
+  ],
+  "citations": [
+  "https://cloud.google.com/monitoring/uptime-checks",
+  "https://cloud.google.com/logging/docs/export/configure_export_v2"
+  ]
+  },
+  {
+  "id": "10-docs-citations-handover",
+  "title": "Finalize documentation, CITATIONS.md, commit and handover",
+  "time_minutes": 15,
+  "inputs_required": [],
+  "task_prompt": {
+  "system_instructions": "Timebox: 15 minutes. Document AgriSwarm with
+  Google doc citations.",
+  "user_task": "Produce: README.md (setup, run demo), CITATIONS.md
+  (step->URL mappings), runbook.md (deploy/monitor). Commit: git add docs/;
+  git commit-m 'Final docs'; git push. handover.json: artifacts, tests, next steps.",
+  "output_schema": {
+  "README.md": "string",
+  "CITATIONS.md": "string",
+  "handover.json": "object"
+  }
+  },
+  "expected_artifacts": [
+  "README.md",
+  "CITATIONS.md",
+  "handover.json"
+  ],
+  "citations": [
+  "https://cloud.google.com/docs",
+  "https://cloud.google.com/source-repositories/docs/adding-repositories-as
+ remotes"
+  8
+ ]
+  }
+  ],
+  "artifacts_index": [
+  "scoped_design.json",
+  "execution_prompts.json"
+  ],
+  "time_spent_minutes": 15,
+  "verification_items": [
+  "Non-Google APIs (e.g., OpenWeatherMap): VERIFY with https://developers.google.com/earth
+ engine/guides/service_account for Earth Engine alternatives or mocks."
+  ]
+  }
+  9

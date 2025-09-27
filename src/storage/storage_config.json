@@ -1,0 +1,27 @@
+{
+  "storage_config": {
+    "provider": "google_drive",
+    "root_folder": "AgriSwarm",
+    "folders": {
+      "data": "AgriSwarm-Data",
+      "reports": "AgriSwarm-Reports",
+      "archive": "AgriSwarm-Archive"
+    },
+    "retention": {
+      "data_retention_days": 90,
+      "report_retention_days": 365,
+      "archive_after_days": 30
+    },
+    "permissions": {
+      "data_folder_access": "project_members",
+      "reports_public_read": false,
+      "archive_restricted": true
+    }
+  },
+  "setup_instructions": [
+    "Create Google Drive folders using DriveManager",
+    "Set up folder permissions",
+    "Configure data retention policies",
+    "Test file operations"
+  ]
+}

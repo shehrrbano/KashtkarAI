@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriSwarm - AI-Powered Agricultural Intelligence</title>
+
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Google Maps API -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCL2tcGwvncOE07j2tcibAzMxUpaQBRsi0&libraries=places&callback=initializeGoogleMapsCallback"></script>
+
+    <style>
+        :root {
+            /* Light Theme Colors - Google Material Design */
+            --primary-color: #1a73e8;
+            --primary-variant: #1557b0;
+            --secondary-color: #34a853;
+            --surface: #ffffff;
+            --surface-variant: #f8f9fa;
+            --background: #f1f3f4;
+            --on-primary: #ffffff;
+            --on-surface: #3c4043;
+            --on-surface-variant: #5f6368;
+            --border: #dadce0;
+            --hover: #f8f9fa;
+            --shadow: rgba(60, 64, 67, 0.1);
+            --shadow-hover: rgba(60, 64, 67, 0.15);
+
+            /* Chat specific */
+            --chat-user-bg: #e8f0fe;
+            --chat-agent-bg: #f1f3f4;
+            --chat-border: #e8eaed;
+
+            /* Spacing */
+            --spacing-xs: 4px;
+            --spacing-sm: 8px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --spacing-xxl: 48px;
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme Colors */
+            --primary-color: #8ab4f8;
+            --primary-variant: #aecbfa;
+            --secondary-color: #81c995;
+            --surface: #2d3748;
+            --surface-variant: #1e1e1e;
+            --background: #121212;
+            --on-primary: #000000;
+            --on-surface: #e8eaed;
+            --on-surface-variant: #9aa0a6;
+            --border: #3c4043;
+            --hover: #3c4043;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-hover: rgba(0, 0, 0, 0.4);
+
+            /* Chat specific - dark */
+            --chat-user-bg: #3c4043;
+            --chat-agent-bg: #2d3748;
+            --chat-border: #5f6368;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--background);
+            color: var(--on-surface);
+            line-height: 1.5;
+            overflow: hidden;
+        }
+
+        /* App Bar */
+        .app-bar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 var(--spacing-lg);
+            height: 64px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 3px var(--shadow);
+            position: relative;
+            z-index: 100;
+        }
+
+        .app-bar-left {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+        }
+
+        .app-title {
+            font-size: 22px;
+            font-weight: 500;
+            color: var(--on-surface);
+        }
+
+        .app-subtitle {
+            font-size: 14px;
+            color: var(--on-surface-variant);
+            margin-left: var(--spacing-sm);
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--secondary-color);
+            box-shadow: 0 0 8px currentColor;
+        }
+
+        .app-bar-right {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            color: var(--on-surface-variant);
+            cursor: pointer;
+            padding: var(--spacing-sm);
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--hover);
+            color: var(--on-surface);
+        }
+
+        /* Main Container */
+        .main-container {
+            display: flex;
+            height: calc(100vh - 64px);
+            overflow: hidden;
+        }
+
+        /* Left Panel - Chat Interface */
+        .left-panel {
+            width: 45%;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border);
+            background: var(--surface-variant);
+        }
+
+        .chat-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--on-surface);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .chat-subtitle {
+            font-size: 14px;
+            color: var(--on-surface-variant);
+        }
+
+        .agents-selector {
+            display: flex;
+            gap: var(--spacing-xs);
+            margin-top: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .agent-chip {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .agent-chip.active {
+            background: var(--primary-color);
+            color: var(--on-primary);
+        }
+
+        .agent-chip:not(.active) {
+            background: var(--surface-variant);
+            color: var(--on-surface-variant);
+            border-color: var(--border);
+        }
+
+        .agent-chip:not(.active):hover {
+            background: var(--hover);
+        }
+
+        .chat-container {
+            flex: 1;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--spacing-lg);
+            display: flex;
+            flex-direction: column;
+            gap: var(--spacing-md);
+        }
+
+        .message {
+            display: flex;
+            gap: var(--spacing-md);
+            max-width: 85%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.agent {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+
+        .avatar.user {
+            background: var(--primary-color);
+            color: var(--on-primary);
+        }
+
+        .avatar.agent {
+            background: var(--secondary-color);
+            color: var(--on-primary);
+        }
+
+        .message-content {
+            background: var(--chat-user-bg);
+            padding: var(--spacing-md);
+            border-radius: 18px;
+            border: 1px solid var(--chat-border);
+            max-width: 100%;
+        }
+
+        .message.user .message-content {
+            background: var(--primary-color);
+            color: var(--on-primary);
+            border-color: var(--primary-color);
+        }
+
+        .message-text {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .agent-label {
+            font-size: 12px;
+            font-weight: 500;
+            margin-bottom: var(--spacing-xs);
+            color: var(--on-surface-variant);
+        }
+
+        .message.agent .agent-label {
+            color: var(--secondary-color);
+        }
+
+        .chat-input-container {
+            padding: var(--spacing-lg);
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: var(--spacing-sm);
+            align-items: flex-end;
+        }
+
+        .chat-input {
+            flex: 1;
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: var(--spacing-md);
+            background: var(--surface-variant);
+            color: var(--on-surface);
+            font-family: inherit;
+            font-size: 14px;
+            resize: none;
+            min-height: 20px;
+            max-height: 120px;
+            overflow-y: auto;
+            transition: all 0.2s ease;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.1);
+        }
+
+        .send-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            background: var(--primary-color);
+            color: var(--on-primary);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 3px var(--shadow);
+        }
+
+        .send-button:hover {
+            background: var(--primary-variant);
+            box-shadow: 0 2px 6px var(--shadow-hover);
+        }
+
+        .send-button:disabled {
+            background: var(--on-surface-variant);
+            cursor: not-allowed;
+        }
+
+        /* Right Panel - Map Interface */
+        .right-panel {
+            width: 55%;
+            background: var(--surface);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .map-header {
+            padding: var(--spacing-lg);
+            border-bottom: 1px solid var(--border);
+            background: var(--surface-variant);
+        }
+
+        .map-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--on-surface);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .map-subtitle {
+            font-size: 14px;
+            color: var(--on-surface-variant);
+        }
+
+        .map-controls {
+            display: flex;
+            gap: var(--spacing-sm);
+            margin-top: var(--spacing-md);
+            flex-wrap: wrap;
+        }
+
+        .map-control-btn {
+            padding: var(--spacing-xs) var(--spacing-md);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            color: var(--on-surface);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .map-control-btn:hover {
+            background: var(--hover);
+        }
+
+        .map-control-btn.active {
+            background: var(--primary-color);
+            color: var(--on-primary);
+            border-color: var(--primary-color);
+        }
+
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+        }
+
+        .map-overlay {
+            position: absolute;
+            top: var(--spacing-lg);
+            right: var(--spacing-lg);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: var(--spacing-md);
+            box-shadow: 0 2px 8px var(--shadow);
+            max-width: 300px;
+        }
+
+        .overlay-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--on-surface);
+            margin-bottom: var(--spacing-sm);
+        }
+
+        .overlay-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-xs) 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .overlay-item:last-child {
+            border-bottom: none;
+        }
+
+        .overlay-label {
+            font-size: 12px;
+            color: var(--on-surface-variant);
+        }
+
+        .overlay-value {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--on-surface);
+        }
+
+        /* Loading States */
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: var(--on-surface-variant);
+            font-size: 14px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-top: 2px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: var(--spacing-sm);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                flex-direction: column;
+            }
+
+            .left-panel, .right-panel {
+                width: 100%;
+            }
+
+            .left-panel {
+                height: 60%;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .right-panel {
+                height: 40%;
+            }
+
+            .app-bar {
+                padding: 0 var(--spacing-md);
+            }
+
+            .app-title {
+                font-size: 18px;
+            }
+
+            .agents-selector {
+                overflow-x: auto;
+                padding-bottom: var(--spacing-xs);
+            }
+
+            .message {
+                max-width: 90%;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* Focus styles for accessibility */
+        .agent-chip:focus,
+        .theme-toggle:focus,
+        .chat-input:focus,
+        .send-button:focus,
+        .map-control-btn:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+    </style>
+</head>
+<body>
+    <!-- App Bar -->
+    <div class="app-bar">
+        <div class="app-bar-left">
+            <div class="status-indicator"></div>
+            <div>
+                <div class="app-title">AgriSwarm</div>
+                <div class="app-subtitle">AI-Powered Agricultural Intelligence</div>
+            </div>
+        </div>
+        <div class="app-bar-right">
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                <span class="material-icons">dark_mode</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Left Panel - Chat Interface -->
+        <div class="left-panel">
+            <div class="chat-header">
+                <div class="chat-title">AI Agents</div>
+                <div class="chat-subtitle">Chat with specialized agricultural agents</div>
+
+                <div class="agents-selector">
+                    <div class="agent-chip active" data-agent="sensor" onclick="selectAgent('sensor')">
+                        <span class="material-icons" style="font-size: 14px; margin-right: 4px;">thermostat</span>
+                        Sensor
+                    </div>
+                    <div class="agent-chip" data-agent="prediction" onclick="selectAgent('prediction')">
+                        <span class="material-icons" style="font-size: 14px; margin-right: 4px;">trending_up</span>
+                        Prediction
+                    </div>
+                    <div class="agent-chip" data-agent="resource" onclick="selectAgent('resource')">
+                        <span class="material-icons" style="font-size: 14px; margin-right: 4px;">build</span>
+                        Resource
+                    </div>
+                    <div class="agent-chip" data-agent="market" onclick="selectAgent('market')">
+                        <span class="material-icons" style="font-size: 14px; margin-right: 4px;">store</span>
+                        Market
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="message agent">
+                        <div class="avatar agent">S</div>
+                        <div class="message-content">
+                            <div class="agent-label">Sensor Agent</div>
+                            <div class="message-text">Hello! I'm your Sensor Agent. I can provide real-time data about your farm's environmental conditions. Ask me about temperature, humidity, soil moisture, or any sensor readings!</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="chat-input-container">
+                    <div class="chat-input-wrapper">
+                        <textarea
+                            class="chat-input"
+                            id="chatInput"
+                            placeholder="Ask me anything about your farm..."
+                            rows="1"
+                            onkeydown="handleKeyPress(event)"
+                        ></textarea>
+                        <button class="send-button" onclick="sendMessage()" id="sendButton">
+                            <span class="material-icons">send</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Map Interface -->
+        <div class="right-panel">
+            <div class="map-header">
+                <div class="map-title">Farm Intelligence Map</div>
+                <div class="map-subtitle">Visualize your agricultural data and insights</div>
+
+                <div class="map-controls">
+                    <button class="map-control-btn active" data-layer="overview" onclick="switchMapLayer('overview')">
+                        Overview
+                    </button>
+                    <button class="map-control-btn" data-layer="weather" onclick="switchMapLayer('weather')">
+                        Weather
+                    </button>
+                    <button class="map-control-btn" data-layer="soil" onclick="switchMapLayer('soil')">
+                        Soil Analysis
+                    </button>
+                    <button class="map-control-btn" data-layer="yield" onclick="switchMapLayer('yield')">
+                        Yield Prediction
+                    </button>
+                </div>
+            </div>
+
+            <div class="map-container">
+                <div id="map" style="width: 100%; height: 100%;"></div>
+
+                <!-- Map Data Overlay -->
+                <div class="map-overlay" id="mapOverlay" style="display: none;">
+                    <div class="overlay-title">Current Location Data</div>
+                    <div class="overlay-item">
+                        <span class="overlay-label">Temperature</span>
+                        <span class="overlay-value" id="tempValue">24°C</span>
+                    </div>
+                    <div class="overlay-item">
+                        <span class="overlay-label">Humidity</span>
+                        <span class="overlay-value" id="humidityValue">65%</span>
+                    </div>
+                    <div class="overlay-item">
+                        <span class="overlay-label">Soil Moisture</span>
+                        <span class="overlay-value" id="soilValue">45%</span>
+                    </div>
+                    <div class="overlay-item">
+                        <span class="overlay-label">Yield Prediction</span>
+                        <span class="overlay-value" id="yieldValue">2.4 tons/ha</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const BACKEND_URL = 'http://localhost:8080';
+        const GOOGLE_MAPS_API_KEY = 'AIzaSyCL2tcGwvncOE07j2tcibAzMxUpaQBRsi0'; // Replace with actual API key
+
+        // State management
+        let currentAgent = 'sensor';
+        let currentTheme = localStorage.getItem('theme') || 'light';
+        let map = null;
+        let currentMapLayer = 'overview';
+
+        // Agent configurations
+        const agents = {
+            sensor: {
+                name: 'Sensor Agent',
+                icon: 'thermostat',
+                color: '#34a853',
+                description: 'Real-time environmental monitoring'
+            },
+            prediction: {
+                name: 'Prediction Agent',
+                icon: 'trending_up',
+                color: '#ea8600',
+                description: 'AI-powered yield and risk predictions'
+            },
+            resource: {
+                name: 'Resource Agent',
+                icon: 'build',
+                color: '#1a73e8',
+                description: 'Resource optimization and planning'
+            },
+            market: {
+                name: 'Market Agent',
+                icon: 'store',
+                color: '#9334e6',
+                description: 'Market analysis and pricing intelligence'
+            }
+        };
+
+        // Initialize application
+        async function initializeApp() {
+            initializeTheme();
+            initializeChat();
+            await initializeMap();
+            await testBackendConnection();
+
+            // Auto-update data every 30 seconds
+            setInterval(updateRealTimeData, 30000);
+        }
+
+        // Theme management
+        function initializeTheme() {
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            updateThemeIcon();
+
+            // Add theme to localStorage
+            localStorage.setItem('theme', currentTheme);
+        }
+
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.documentElement.setAttribute('data-theme', currentTheme);
+            localStorage.setItem('theme', currentTheme);
+            updateThemeIcon();
+        }
+
+        function updateThemeIcon() {
+            const themeToggle = document.querySelector('.theme-toggle .material-icons');
+            themeToggle.textContent = currentTheme === 'light' ? 'dark_mode' : 'light_mode';
+        }
+
+        // Chat interface
+        function initializeChat() {
+            const chatInput = document.getElementById('chatInput');
+            const chatMessages = document.getElementById('chatMessages');
+
+            // Auto-resize textarea
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+
+            // Focus chat input
+            chatInput.focus();
+        }
+
+        function selectAgent(agentType) {
+            currentAgent = agentType;
+
+            // Update active agent chip
+            document.querySelectorAll('.agent-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            document.querySelector(`[data-agent="${agentType}"]`).classList.add('active');
+
+            // Add welcome message for new agent
+            addAgentMessage(`Hello! I'm the ${agents[agentType].name}. ${agents[agentType].description}. How can I help you today?`);
+        }
+
+        function sendMessage() {
+            const chatInput = document.getElementById('chatInput');
+            const message = chatInput.value.trim();
+
+            if (!message) return;
+
+            // Add user message
+            addUserMessage(message);
+
+            // Clear input
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+
+            // Disable send button temporarily
+            const sendButton = document.getElementById('sendButton');
+            sendButton.disabled = true;
+
+            // Process message based on current agent
+            setTimeout(() => {
+                processAgentResponse(message);
+                sendButton.disabled = false;
+            }, 1000);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function addUserMessage(text) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = createMessageElement('user', text);
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function addAgentMessage(text) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = createMessageElement('agent', text);
+            chatMessages.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function createMessageElement(type, text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+
+            const avatarDiv = document.createElement('div');
+            avatarDiv.className = `avatar ${type}`;
+            avatarDiv.textContent = type === 'user' ? 'U' : agents[currentAgent].name.charAt(0);
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+
+            if (type === 'agent') {
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'agent-label';
+                labelDiv.textContent = agents[currentAgent].name;
+                contentDiv.appendChild(labelDiv);
+            }
+
+            const textDiv = document.createElement('div');
+            textDiv.className = 'message-text';
+            textDiv.textContent = text;
+            contentDiv.appendChild(textDiv);
+
+            messageDiv.appendChild(avatarDiv);
+            messageDiv.appendChild(contentDiv);
+
+            return messageDiv;
+        }
+
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Agent response processing
+        async function processAgentResponse(userMessage) {
+            try {
+                console.log(`🤖 Processing response for agent: ${currentAgent}, message: ${userMessage}`);
+                let response;
+
+                switch (currentAgent) {
+                    case 'sensor':
+                        console.log('📡 Calling sensor agent...');
+                        response = await getSensorResponse(userMessage);
+                        break;
+                    case 'prediction':
+                        console.log('🔮 Calling prediction agent...');
+                        response = await getPredictionResponse(userMessage);
+                        break;
+                    case 'resource':
+                        console.log('🔧 Calling resource agent...');
+                        response = await getResourceResponse(userMessage);
+                        break;
+                    case 'market':
+                        console.log('📈 Calling market agent...');
+                        response = await getMarketResponse(userMessage);
+                        break;
+                    default:
+                        console.log('❓ Unknown agent:', currentAgent);
+                        response = "I'm not sure how to help with that. Can you ask me something related to agricultural monitoring?";
+                }
+
+                console.log(`✅ Agent response: ${response}`);
+                addAgentMessage(response);
+                updateMapData();
+
+            } catch (error) {
+                console.error('❌ Error processing agent response:', error);
+                addAgentMessage(`❌ Error: ${error.message}. Please check the console for details.`);
+            }
+        }
+
+        // API communication
+        async function makeAPICall(endpoint) {
+            try {
+                console.log(`🔄 Making API call to: ${BACKEND_URL}${endpoint}`);
+                const response = await fetch(`${BACKEND_URL}${endpoint}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    mode: 'cors'
+                });
+
+                console.log(`📡 Response status: ${response.status}`);
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+
+                const data = await response.json();
+                console.log(`✅ API call successful:`, data);
+                return data;
+            } catch (error) {
+                console.error(`❌ API Error for ${endpoint}:`, error.message);
+                throw error;
+            }
+        }
+
+        async function testBackendConnection() {
+            try {
+                const status = await makeAPICall('/api/status');
+                console.log(`✅ Backend connected - Version: ${status.version}`);
+                addAgentMessage("✅ Backend connection established. I'm ready to help!");
+            } catch (error) {
+                console.error('❌ Backend connection failed:', error);
+                addAgentMessage("⚠️ I'm having trouble connecting to the backend. Some features may be limited.");
+            }
+        }
+
+        // Agent-specific responses
+        async function getSensorResponse(message) {
+            const data = await makeAPICall('/api/sensor');
+
+            if (message.toLowerCase().includes('temperature')) {
+                return `Current temperature is ${data.temperature.toFixed(1)}°C. ${getTemperatureAdvice(data.temperature)}`;
+            } else if (message.toLowerCase().includes('humidity')) {
+                return `Current humidity is ${data.humidity.toFixed(1)}%. ${getHumidityAdvice(data.humidity)}`;
+            } else if (message.toLowerCase().includes('soil')) {
+                return `Current soil moisture is ${data.soilMoisture.toFixed(1)}%. ${getSoilAdvice(data.soilMoisture)}`;
+            } else {
+                return `Current conditions: ${data.temperature.toFixed(1)}°C, ${data.humidity.toFixed(1)}% humidity, ${data.soilMoisture.toFixed(1)}% soil moisture. Location: ${data.location.region}, ${data.location.district}.`;
+            }
+        }
+
+        async function getPredictionResponse(message) {
+            const data = await makeAPICall('/api/predictions');
+
+            if (message.toLowerCase().includes('yield')) {
+                return `Yield prediction: ${data.yield.predictedYield} kg/acre with ${data.yield.score}% confidence. ${getYieldAdvice(data.yield)}`;
+            } else if (message.toLowerCase().includes('pest')) {
+                return `Pest risk level: ${data.pestRisk.level} (${data.pestRisk.score}/100). ${getPestAdvice(data.pestRisk)}`;
+            } else if (message.toLowerCase().includes('harvest')) {
+                return `Harvest is predicted in ${data.harvest.daysToHarvest} days. ${getHarvestAdvice(data.harvest)}`;
+            } else {
+                return `Key predictions: ${data.yield.predictedYield} kg/acre yield, ${data.pestRisk.level} pest risk, harvest in ${data.harvest.daysToHarvest} days.`;
+            }
+        }
+
+        async function getResourceResponse(message) {
+            const data = await makeAPICall('/api/resources');
+
+            if (message.toLowerCase().includes('water')) {
+                return `Water requirement: ${Math.round(data.water.amount)}L. ${getWaterAdvice(data.water)}`;
+            } else if (message.toLowerCase().includes('fertilizer')) {
+                return `Fertilizer needed: N:${data.fertilizer.nitrogen}kg, P:${data.fertilizer.phosphorus}kg, K:${data.fertilizer.potassium}kg.`;
+            } else if (message.toLowerCase().includes('cost')) {
+                return `Total estimated cost: ₹${data.costAnalysis.total}. ${getCostAdvice(data.costAnalysis)}`;
+            } else {
+                return `Resource needs: ${Math.round(data.water.amount)}L water, ₹${data.costAnalysis.total} total cost, ${data.labor.total} workers needed.`;
+            }
+        }
+
+        async function getMarketResponse(message) {
+            const data = await makeAPICall('/api/market');
+
+            if (message.toLowerCase().includes('price')) {
+                return `Current price: ₹${data.price_prediction.current_price}/kg, predicted: ₹${data.price_prediction.predicted_price}/kg. Trend: ${data.price_prediction.trend}.`;
+            } else if (message.toLowerCase().includes('sell')) {
+                return `Selling recommendation: ${data.selling_recommendation.action}. ${getSellingAdvice(data.selling_recommendation)}`;
+            } else if (message.toLowerCase().includes('risk')) {
+                return `Market risk level: ${data.risk_assessment.overall_risk}. Confidence: ${data.price_prediction.confidence}%.`;
+            } else {
+                return `Market data: ₹${data.price_prediction.current_price}/kg current, ₹${data.price_prediction.predicted_price}/kg predicted, ${data.selling_recommendation.action} recommended action.`;
+            }
+        }
+
+        // Advice functions
+        function getTemperatureAdvice(temp) {
+            if (temp < 15) return "This is quite cool - consider protective measures for sensitive crops.";
+            if (temp > 35) return "High temperature alert - ensure adequate irrigation.";
+            return "Temperature is optimal for crop growth.";
+        }
+
+        function getHumidityAdvice(humidity) {
+            if (humidity < 40) return "Low humidity - increase irrigation frequency.";
+            if (humidity > 80) return "High humidity - monitor for fungal diseases.";
+            return "Humidity levels are good.";
+        }
+
+        function getSoilAdvice(moisture) {
+            if (moisture < 30) return "Soil is dry - irrigation recommended.";
+            if (moisture > 70) return "Soil is very wet - reduce watering.";
+            return "Soil moisture is adequate.";
+        }
+
+        function getYieldAdvice(yield) {
+            if (yield.score < 50) return "Yield may be below average - consider intervention.";
+            if (yield.score > 80) return "Excellent yield expected!";
+            return "Yield prediction is moderate.";
+        }
+
+        function getPestAdvice(pestRisk) {
+            if (pestRisk.score > 70) return "High pest risk - consider preventive measures.";
+            if (pestRisk.score < 30) return "Low pest risk - conditions are favorable.";
+            return "Moderate pest risk - regular monitoring recommended.";
+        }
+
+        function getHarvestAdvice(harvest) {
+            if (harvest.daysToHarvest < 7) return "Harvest window approaching!";
+            if (harvest.daysToHarvest > 30) return "Still some time before harvest.";
+            return "Harvest preparations should begin soon.";
+        }
+
+        function getWaterAdvice(water) {
+            if (water.amount > 1000) return "High water requirement - check irrigation system.";
+            if (water.amount < 200) return "Low water requirement - conserve water.";
+            return "Water requirement is moderate.";
+        }
+
+        function getCostAdvice(cost) {
+            if (cost.total > 50000) return "High cost projection - review expenses.";
+            if (cost.total < 10000) return "Cost-effective operations.";
+            return "Moderate cost structure.";
+        }
+
+        function getSellingAdvice(recommendation) {
+            if (recommendation.action.includes('hold')) return "Market conditions suggest waiting for better prices.";
+            if (recommendation.action.includes('sell')) return "Good time to sell with current market trends.";
+            return "Monitor market closely for optimal timing.";
+        }
+
+        // Map integration
+        async function initializeMap() {
+            try {
+                // Check if Google Maps API is loaded
+                if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+                    console.log('⏳ Waiting for Google Maps API to load...');
+                    // Wait for API to load
+                    await new Promise((resolve, reject) => {
+                        let attempts = 0;
+                        const checkGoogle = () => {
+                            attempts++;
+                            if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
+                                resolve();
+                            } else if (attempts < 50) { // Wait up to 5 seconds
+                                setTimeout(checkGoogle, 100);
+                            } else {
+                                reject(new Error('Google Maps API failed to load'));
+                            }
+                        };
+                        checkGoogle();
+                    });
+                }
+
+                // Default coordinates (you can replace with actual farm coordinates)
+                const defaultLocation = { lat: 28.6139, lng: 77.2090 }; // New Delhi coordinates
+
+                map = new google.maps.Map(document.getElementById('map'), {
+                    center: defaultLocation,
+                    zoom: 15,
+                    styles: getMapStyles(),
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: false
+                });
+
+                // Add marker for farm location
+                new google.maps.Marker({
+                    position: defaultLocation,
+                    map: map,
+                    title: 'Farm Location',
+                    icon: {
+                        path: google.maps.SymbolPath.CIRCLE,
+                        scale: 12,
+                        fillColor: '#34a853',
+                        fillOpacity: 1,
+                        strokeColor: '#ffffff',
+                        strokeWeight: 2
+                    }
+                });
+
+                console.log('✅ Map initialized successfully');
+
+            } catch (error) {
+                console.error('❌ Map initialization failed:', error);
+                const mapElement = document.getElementById('map');
+                mapElement.innerHTML = `
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <span>Map loading... (${error.message})</span>
+                    </div>
+                `;
+            }
+        }
+
+        function getMapStyles() {
+            return [
+                {
+                    featureType: 'all',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#f5f5f5' }]
+                },
+                {
+                    featureType: 'water',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#c9c9c9' }]
+                },
+                {
+                    featureType: 'landscape',
+                    elementType: 'geometry',
+                    stylers: [{ color: '#f5f5f5' }]
+                }
+            ];
+        }
+
+        function switchMapLayer(layer) {
+            currentMapLayer = layer;
+
+            // Update active button
+            document.querySelectorAll('.map-control-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-layer="${layer}"]`).classList.add('active');
+
+            // Update map overlay
+            updateMapOverlay(layer);
+        }
+
+        function updateMapOverlay(layer) {
+            const overlay = document.getElementById('mapOverlay');
+
+            // For now, show overlay on overview layer
+            overlay.style.display = layer === 'overview' ? 'block' : 'none';
+        }
+
+        function updateMapData() {
+            // Update overlay values with real data
+            // This would be called after API responses
+            updateMapOverlay(currentMapLayer);
+        }
+
+        // Real-time data updates
+        async function updateRealTimeData() {
+            try {
+                const sensorData = await makeAPICall('/api/sensor');
+
+                // Update map overlay
+                document.getElementById('tempValue').textContent = `${sensorData.temperature.toFixed(1)}°C`;
+                document.getElementById('humidityValue').textContent = `${sensorData.humidity.toFixed(1)}%`;
+                document.getElementById('soilValue').textContent = `${sensorData.soilMoisture.toFixed(1)}%`;
+
+                // Update yield data if available
+                try {
+                    const predictionData = await makeAPICall('/api/predictions');
+                    document.getElementById('yieldValue').textContent = `${predictionData.yield.predictedYield} kg/acre`;
+                } catch (error) {
+                    console.log('Prediction data not available for overlay update');
+                }
+
+            } catch (error) {
+                console.log('Real-time data update failed:', error);
+            }
+        }
+
+        // Test all agents function (for debugging)
+        async function testAllAgents() {
+            console.log('🧪 Testing all agents...');
+            const originalAgent = currentAgent;
+
+            const agentsToTest = ['sensor', 'prediction', 'resource', 'market'];
+            const results = {};
+
+            for (const agent of agentsToTest) {
+                try {
+                    console.log(`🧪 Testing ${agent} agent...`);
+                    currentAgent = agent;
+
+                    let response;
+                    switch (agent) {
+                        case 'sensor':
+                            response = await getSensorResponse('temperature');
+                            break;
+                        case 'prediction':
+                            response = await getPredictionResponse('yield');
+                            break;
+                        case 'resource':
+                            response = await getResourceResponse('water');
+                            break;
+                        case 'market':
+                            response = await getMarketResponse('price');
+                            break;
+                    }
+
+                    results[agent] = { success: true, response: response };
+                    console.log(`✅ ${agent} agent working:`, response);
+
+                } catch (error) {
+                    results[agent] = { success: false, error: error.message };
+                    console.error(`❌ ${agent} agent failed:`, error.message);
+                }
+            }
+
+            currentAgent = originalAgent;
+            console.log('🧪 Test results:', results);
+
+            // Show results in chat
+            addAgentMessage(`🧪 Agent Test Results:
+Sensor: ${results.sensor.success ? '✅' : '❌'}
+Prediction: ${results.prediction.success ? '✅' : '❌'}
+Resource: ${results.resource.success ? '✅' : '❌'}
+Market: ${results.market.success ? '✅' : '❌'}
+
+Check console (F12) for detailed results.`);
+
+            return results;
+        }
+
+        // Make test function globally available
+        window.testAllAgents = testAllAgents;
+
+        // Initialize when DOM is loaded and Google Maps API is ready
+        function initializeGoogleMapsCallback() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initializeApp);
+            } else {
+                initializeApp();
+            }
+        }
+
+        // Check if Google Maps API is already loaded
+        if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
+            initializeGoogleMapsCallback();
+        } else {
+            // Wait for Google Maps API to load
+            window.initializeGoogleMapsCallback = initializeGoogleMapsCallback;
+        }
+
+        // Handle window resize for responsive design
+        window.addEventListener('resize', function() {
+            if (map) {
+                google.maps.event.trigger(map, 'resize');
+            }
+        });
+    </script>
+</body>
+</html>

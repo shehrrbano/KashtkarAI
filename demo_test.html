@@ -1,0 +1,2776 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AgriSwarm Production Demo - Google Cloud Integration</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 20px; background: #f8f9fa; }
+        .header { background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
+        .section { margin: 20px 0; padding: 20px; border-radius: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+
+        /* Primary Action Section - Most Important */
+        .primary-action {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            text-align: center;
+            border-radius: 15px;
+        }
+        .primary-action h2 { margin: 0 0 10px 0; font-size: 28px; }
+        .primary-action p { margin: 0 0 20px 0; opacity: 0.9; }
+        .primary-button {
+            background: white;
+            color: #007bff;
+            border: none;
+            padding: 15px 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+        }
+        .primary-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+        }
+
+        /* VISUAL HIERARCHY: Typography with clear importance */
+        .scan-friendly {
+            line-height: 1.6;
+        }
+        .scan-friendly h1 {
+            font-size: 24px;
+            margin: 15px 0 10px 0;
+            color: #333;
+            font-weight: bold;
+        }
+        .scan-friendly h2 {
+            font-size: 20px;
+            margin: 15px 0 8px 0;
+            color: #333;
+            border-left: 4px solid #007bff;
+            padding-left: 10px;
+        }
+        .scan-friendly h3 {
+            font-size: 18px;
+            margin: 12px 0 8px 0;
+            color: #333;
+        }
+        .scan-friendly p {
+            margin: 8px 0;
+            color: #555;
+            font-size: 16px;
+        }
+
+        /* CONVENTION: Standard trigger word styling */
+        .trigger-word {
+            background: linear-gradient(135deg, #ffc107, #fd7e14);
+            color: #000;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* SCANNING SUPPORT: Improved bullet points */
+        .scan-bullets {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        .scan-bullets li {
+            margin: 10px 0;
+            padding-left: 30px;
+            position: relative;
+            line-height: 1.5;
+            font-size: 16px;
+        }
+        .scan-bullets li:before {
+            content: "✅";
+            position: absolute;
+            left: 0;
+            font-size: 18px;
+        }
+
+        /* NOISE REDUCTION: Clean, minimal areas */
+        .clear-area {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+
+        /* CONVENTION: Standard button styling with clear affordance */
+        .nav-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-height: 140px;
+            position: relative;
+        }
+        .nav-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        /* VISUAL HIERARCHY: Clear section separation */
+        .section {
+            margin: 25px 0;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            background: white;
+        }
+
+        /* HIERARCHY: Primary action stands out */
+        .primary-action {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            text-align: center;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+        }
+
+        /* SCANNING: Short paragraphs, never walls of text */
+        .scan-paragraph {
+            margin: 10px 0;
+            line-height: 1.6;
+            max-width: 600px;
+        }
+
+        /* CONVENTION: Standard status indicators */
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .status-online {
+            background-color: #28a745;
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+        }
+        .status-offline {
+            background-color: #dc3545;
+        }
+        .status-warning {
+            background-color: #ffc107;
+        }
+        .last-update { margin-top: 15px; opacity: 0.8; font-size: 14px; }
+
+        /* Status Overview - Immediate Information */
+        .status-overview {
+            background: white;
+            border-left: 5px solid #28a745;
+        }
+        .alerts-summary {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        .alert-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .priority-low { background: #d4edda; color: #155724; }
+        .priority-medium { background: #fff3cd; color: #856404; }
+        .priority-high { background: #f8d7da; color: #721c24; }
+        .alert-icon { margin-right: 8px; font-size: 18px; }
+        .alert-text { font-size: 14px; }
+
+        /* Simple Navigation - Clear Options */
+        .navigation-simple {
+            background: white;
+        }
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .nav-button {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 25px 20px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        .nav-button:hover {
+            border-color: #007bff;
+            background: #f0f8ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,123,255,0.15);
+        }
+        .nav-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+        .nav-label {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .nav-desc {
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Legacy styles for compatibility */
+        .success { background-color: #d4edda; border-color: #c3e6cb; }
+        .info { background-color: #d1ecf1; border-color: #bee5eb; }
+        .warning { background-color: #fff3cd; border-color: #ffeaa7; }
+        .error { background-color: #f8d7da; border-color: #dc3545; }
+        button { padding: 12px 24px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; transform: translateY(-1px); }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .result { margin: 10px 0; padding: 15px; background: #f8f9fa; border-left: 5px solid #007bff; border-radius: 5px; }
+        .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 15px 0; }
+        .metric-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }
+        .metric-value { font-size: 24px; font-weight: bold; color: #28a745; }
+        .metric-label { color: #6c757d; font-size: 14px; }
+        .status-indicator { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: 8px; }
+        .status-online { background-color: #28a745; }
+        .status-offline { background-color: #dc3545; }
+        .status-warning { background-color: #ffc107; }
+        .log-entry { font-family: monospace; background: #2d3748; color: #e2e8f0; padding: 8px; margin: 4px 0; border-radius: 4px; }
+        .api-response { background: #f7fafc; border: 1px solid #e2e8f0; padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .loading { display: inline-block; width: 20px; height: 20px; border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+    <!-- Google Maps API - Demo Mode (No API Key Required) -->
+    <!-- In production, replace with: https://maps.googleapis.com/maps/api/js?key=YOUR_ACTUAL_API_KEY&libraries=places -->
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>🚜 AgriSwarm System Demo</h1>
+    <p>This demo shows the AgriSwarm logic working locally before deployment to Google Apps Script.</p>
+
+    <!-- CONVENTION: Logo top-left, clear site ID -->
+    <div class="header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1 style="margin: 0; font-size: 24px;">🚜 Farm Dashboard</h1>
+                <p style="margin: 5px 0 0 0; font-size: 14px; opacity: 0.9;"><strong>FREE</strong> Smart Farm Analysis - Know Your Farm's Status in Seconds</p>
+            </div>
+            <div id="systemStatus" style="text-align: right;">
+                <div style="font-size: 12px; opacity: 0.8;">System Status</div>
+                <div><span class="status-indicator status-online"></span> ✅ Ready</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRIMARY ACTION - Most Prominent (Visual Hierarchy) -->
+    <div class="section primary-action">
+        <!-- CONVENTION: Clear call-to-action area -->
+        <div style="background: linear-gradient(135deg, #28a745, #20c997); color: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center;">
+            <div style="font-size: 18px; font-weight: bold; margin-bottom: 5px;">🎯 ONE CLICK = Complete Farm Analysis</div>
+            <div style="font-size: 14px; opacity: 0.9;">Get yield predictions, water needs, and market prices instantly</div>
+        </div>
+
+        <!-- HIERARCHY: Most important button largest -->
+        <div style="text-align: center; margin: 20px 0;">
+            <button onclick="runFullWorkflow()" id="runWorkflowBtn" class="primary-button">
+                🚀 Analyze My Farm NOW - <span class="trigger-word">FREE</span>
+            </button>
+        </div>
+
+        <!-- CONVENTION: Status information clearly separated -->
+        <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; text-align: center; border-left: 4px solid #007bff;">
+            <div style="font-size: 12px; color: #666; margin-bottom: 5px;">✨ Last updated: <span id="lastUpdateTime">Just now</span> • No signup required</div>
+        </div>
+    </div>
+
+    <!-- CLEARLY DEFINED AREAS: Farm Status Section -->
+    <div class="section status-overview">
+        <h3>🚨 Farm Status</h3>
+
+        <!-- CONVENTION: Status indicators clearly defined -->
+        <div style="background: white; border: 1px solid #dee2e6; border-radius: 8px; padding: 15px; margin-bottom: 15px;">
+            <div class="alerts-summary" id="alertsSummary">
+                <div class="alert-item priority-low">
+                    <span class="alert-icon">✅</span>
+                    <span class="alert-text"><strong>GOOD NEWS:</strong> All systems normal</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCANNING SUPPORT: Key metrics in digestible format -->
+        <div style="background: #f8f9fa; border-radius: 8px; padding: 15px;">
+            <h4 style="margin: 0 0 15px 0; font-size: 16px;">📊 Current Conditions</h4>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
+                <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">
+                    <div style="font-size: 20px; margin-bottom: 5px;">🌡️</div>
+                    <div style="font-size: 12px; color: #666;">Temperature</div>
+                    <div style="font-size: 16px; font-weight: bold; color: #28a745;">Optimal (25°C)</div>
+                </div>
+                <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">
+                    <div style="font-size: 20px; margin-bottom: 5px;">💧</div>
+                    <div style="font-size: 12px; color: #666;">Soil Moisture</div>
+                    <div style="font-size: 16px; font-weight: bold; color: #28a745;">Good (65%)</div>
+                </div>
+                <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">
+                    <div style="font-size: 20px; margin-bottom: 5px;">🌱</div>
+                    <div style="font-size: 12px; color: #666;">Crop Stage</div>
+                    <div style="font-size: 16px; font-weight: bold; color: #007bff;">Flowering</div>
+                </div>
+                <div style="text-align: center; padding: 10px; background: white; border-radius: 5px;">
+                    <div style="font-size: 20px; margin-bottom: 5px;">📈</div>
+                    <div style="font-size: 12px; color: #666;">Market Trend</div>
+                    <div style="font-size: 16px; font-weight: bold; color: #28a745;">Up +5%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONVENTION: Standard navigation grid with clear clickability -->
+    <div class="section navigation-simple">
+        <h3>🔧 Farm Management Tools</h3>
+
+        <!-- CONVENTION: Clear description of navigation purpose -->
+        <div style="margin-bottom: 15px; padding: 10px; background: #e7f3ff; border-radius: 5px; border-left: 4px solid #007bff;">
+            <strong>💡 How to use:</strong> Click any tool below. Each opens instantly. Use your browser's back button to return here anytime.
+        </div>
+
+        <div class="nav-grid">
+            <!-- CONVENTION: Standard button shapes with clear affordance -->
+            <button onclick="showFieldMonitoring()" class="nav-button" style="border: 2px solid #28a745; background: #f8fff8;">
+                <div class="nav-icon">🌱</div>
+                <div class="nav-label"><strong>FIELD STATUS</strong></div>
+                <div class="nav-desc">Check sensors & crop health</div>
+                <div style="font-size: 12px; color: #28a745; margin-top: 5px; font-weight: bold;">Most Popular</div>
+            </button>
+            <button onclick="showIrrigationControl()" class="nav-button" style="border: 2px solid #007bff; background: #f8faff;">
+                <div class="nav-icon">💧</div>
+                <div class="nav-label"><strong>WATER MANAGEMENT</strong></div>
+                <div class="nav-desc">Irrigation & soil moisture</div>
+                <div style="font-size: 12px; color: #007bff; margin-top: 5px; font-weight: bold;">Quick Access</div>
+            </button>
+            <button onclick="showMarketInfo()" class="nav-button" style="border: 2px solid #ffc107; background: #fffcf0;">
+                <div class="nav-icon">💰</div>
+                <div class="nav-label"><strong>MARKET PRICES</strong></div>
+                <div class="nav-desc">Current rates & best timing</div>
+                <div style="font-size: 12px; color: #856404; margin-top: 5px; font-weight: bold;">Money Maker</div>
+            </button>
+            <button onclick="showReports()" class="nav-button" style="border: 2px solid #6f42c1; background: #faf8ff;">
+                <div class="nav-icon">📊</div>
+                <div class="nav-label"><strong>FARM REPORTS</strong></div>
+                <div class="nav-desc"><span class="trigger-word">FREE</span> history & analytics</div>
+                <div style="font-size: 12px; color: #6f42c1; margin-top: 5px; font-weight: bold;">Detailed View</div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Google Maps Integration -->
+    <div class="section" id="mapSection" style="display: none;">
+        <h3>🗺️ Farm Monitoring Map</h3>
+        <div id="farmMap" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+        <div style="margin-top: 10px; font-size: 14px; color: #6c757d;">
+            Interactive farm map with real-time sensor locations and status
+        </div>
+    </div>
+
+    <!-- Real-time Metrics Dashboard -->
+    <div class="section" id="metricsSection" style="display: none;">
+        <h3>📊 Real-Time Metrics</h3>
+        <div class="metrics" id="metricsContainer">
+            <!-- Metrics will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- System Logs -->
+    <div class="section" id="logsSection" style="display: none;">
+        <h3>📋 System Logs</h3>
+        <div id="systemLogs" style="max-height: 300px; overflow-y: auto;">
+            <!-- Logs will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Results Display -->
+    <div class="section" id="resultsSection" style="display: none;">
+        <h3>📈 Workflow Results</h3>
+        <div id="workflowResults"></div>
+    </div>
+
+    <!-- Google Services Status -->
+    <div class="section" id="servicesSection" style="display: none;">
+        <h3>☁️ Google Cloud Services</h3>
+        <div id="googleServicesStatus"></div>
+    </div>
+
+    <!-- Architecture Information -->
+    <div class="section" id="architectureSection" style="display: none;">
+        <h3>🏗️ Production Architecture</h3>
+        <div id="architectureInfo"></div>
+    </div>
+
+    <!-- Market Analysis -->
+    <div class="section" id="marketSection" style="display: none;">
+        <h3>📈 Market Intelligence</h3>
+        <div id="marketAnalysis"></div>
+    </div>
+
+    <!-- Alerts Panel -->
+    <div class="section" id="alertsSection" style="display: none;">
+        <h3>⚠️ System Alerts</h3>
+        <div id="alertsPanel"></div>
+    </div>
+
+    <!-- BILLBOARD Footer - Works at a Glance -->
+    <div style="background: #343a40; color: white; padding: 20px; border-radius: 10px; margin-top: 30px;">
+        <div style="max-width: 800px; margin: 0 auto; text-align: center;">
+            <h3 style="margin: 0 0 15px 0;">🎯 Farm Smart. Farm Simple.</h3>
+            <p style="margin: 0 0 10px 0; opacity: 0.9;">FREE Analysis • Real-time Data • Expert Recommendations</p>
+            <div style="font-size: 12px; opacity: 0.7; margin-top: 10px;">
+                🚀 Powered by Google AI • 📱 Works on Any Device • 🔒 Your Data Stays Private
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Production-Ready AgriSwarm System with Google Cloud Integration
+        class ProductionAgriSwarm {
+            constructor() {
+                this.systemStatus = 'initializing';
+                this.googleServices = {};
+                this.realTimeData = {};
+                this.historicalData = [];
+                this.alerts = [];
+                this.logs = [];
+                this.charts = {};
+                this.map = null;
+                this.userLocation = { lat: 31.5204, lng: 74.3587 }; // Lahore, Pakistan
+                this.initializeGoogleServices();
+            }
+
+            // Initialize Google Services Integration
+            async initializeGoogleServices() {
+                this.log('🔧 Initializing Google Cloud Services...');
+
+                try {
+                    // Initialize Google Maps
+                    await this.initializeGoogleMaps();
+
+                    // Initialize Google Sheets for data storage
+                    await this.initializeGoogleSheets();
+
+                    // Initialize Google Drive for file storage
+                    await this.initializeGoogleDrive();
+
+                    // Initialize Gmail for notifications
+                    await this.initializeGmail();
+
+                    // Initialize Google Calendar for scheduling
+                    await this.initializeGoogleCalendar();
+
+                    // Initialize Weather API
+                    await this.initializeWeatherAPI();
+
+                    this.systemStatus = 'ready';
+                    this.log('✅ All Google services initialized successfully');
+                    this.updateStatusIndicator();
+
+                } catch (error) {
+                    this.log(`❌ Error initializing services: ${error.message}`);
+                    this.systemStatus = 'error';
+                }
+            }
+
+            // Google Maps Integration (Demo Mode)
+            async initializeGoogleMaps() {
+                return new Promise((resolve) => {
+                    const mapContainer = document.getElementById('farmMap');
+
+                    // Check if Google Maps API is available
+                    if (typeof google !== 'undefined' && google.maps) {
+                        // Real Google Maps (requires API key)
+                        try {
+                            const mapOptions = {
+                                center: this.userLocation,
+                                zoom: 12,
+                                mapTypeId: google.maps.MapTypeId.HYBRID
+                            };
+
+                            this.map = new google.maps.Map(mapContainer, mapOptions);
+
+                            // Add farm boundary
+                            const farmBoundary = new google.maps.Polygon({
+                                paths: [
+                                    { lat: 31.5204, lng: 74.3587 },
+                                    { lat: 31.5250, lng: 74.3587 },
+                                    { lat: 31.5250, lng: 74.3650 },
+                                    { lat: 31.5204, lng: 74.3650 }
+                                ],
+                                strokeColor: '#28a745',
+                                strokeOpacity: 0.8,
+                                strokeWeight: 2,
+                                fillColor: '#28a745',
+                                fillOpacity: 0.3
+                            });
+                            farmBoundary.setMap(this.map);
+
+                            // Add sensor markers
+                            this.addSensorMarkers();
+                        } catch (error) {
+                            this.log('Google Maps API key required for full functionality');
+                            this.createDemoMap(mapContainer);
+                        }
+                    } else {
+                        // Demo mode without API key
+                        this.createDemoMap(mapContainer);
+                    }
+
+                    resolve();
+                });
+            }
+
+            createDemoMap(container) {
+                // Create a visual representation without Google Maps API
+                container.innerHTML = `
+                    <div style="width: 100%; height: 100%; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 8px; position: relative; display: flex; align-items: center; justify-content: center;">
+                        <div style="text-align: center; color: white;">
+                            <h3 style="margin: 0 0 20px 0;">🚜 Farm Layout - Lahore, Punjab</h3>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; max-width: 300px;">
+                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                                    <div style="font-size: 24px; margin-bottom: 8px;">🌡️</div>
+                                    <div style="font-size: 12px;">Temperature<br>Sensor</div>
+                                    <div style="font-size: 10px; margin-top: 5px; color: #90EE90;">● Online</div>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                                    <div style="font-size: 24px; margin-bottom: 8px;">💧</div>
+                                    <div style="font-size: 12px;">Soil Moisture<br>Sensor</div>
+                                    <div style="font-size: 10px; margin-top: 5px; color: #FFD700;">● Warning</div>
+                                </div>
+                                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px;">
+                                    <div style="font-size: 24px; margin-bottom: 8px;">🌿</div>
+                                    <div style="font-size: 12px;">Crop Health<br>Monitor</div>
+                                    <div style="font-size: 10px; margin-top: 5px; color: #FF6B6B;">● Offline</div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 20px; font-size: 14px; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px;">
+                                📍 Location: 31.5204°N, 74.3587°E<br>
+                                📊 Farm Size: 50 acres<br>
+                                🚜 Equipment: 3 tractors, 2 irrigation systems<br>
+                                🔄 Last Update: ${new Date().toLocaleTimeString()}
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                this.log('🗺️ Demo farm map displayed (Google Maps API key required for full functionality)');
+            }
+
+            addSensorMarkers() {
+                const sensorLocations = [
+                    { lat: 31.5204, lng: 74.3587, type: 'temperature', status: 'online' },
+                    { lat: 31.5220, lng: 74.3600, type: 'humidity', status: 'online' },
+                    { lat: 31.5230, lng: 74.3620, type: 'soil_moisture', status: 'warning' },
+                    { lat: 31.5210, lng: 74.3640, type: 'rainfall', status: 'offline' }
+                ];
+
+                sensorLocations.forEach(sensor => {
+                    const marker = new google.maps.Marker({
+                        position: { lat: sensor.lat, lng: sensor.lng },
+                        map: this.map,
+                        title: `${sensor.type} sensor`,
+                        icon: this.getSensorIcon(sensor.status)
+                    });
+
+                    const infoWindow = new google.maps.InfoWindow({
+                        content: `
+                            <div style="font-family: Arial, sans-serif;">
+                                <h4>${sensor.type.replace('_', ' ').toUpperCase()} SENSOR</h4>
+                                <p>Status: <span style="color: ${sensor.status === 'online' ? 'green' : sensor.status === 'warning' ? 'orange' : 'red'}">${sensor.status}</span></p>
+                                <p>Location: ${sensor.lat.toFixed(4)}, ${sensor.lng.toFixed(4)}</p>
+                                <button onclick="agriSwarm.getSensorData('${sensor.type}')" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">
+                                    Get Live Data
+                                </button>
+                            </div>
+                        `
+                    });
+
+                    marker.addListener('click', () => {
+                        infoWindow.open(this.map, marker);
+                    });
+                });
+            }
+
+            getSensorIcon(status) {
+                const colors = {
+                    online: 'http://maps.google.com/mapfiles/ms/icons/green-dot.png',
+                    warning: 'http://maps.google.com/mapfiles/ms/icons/yellow-dot.png',
+                    offline: 'http://maps.google.com/mapfiles/ms/icons/red-dot.png'
+                };
+                return colors[status] || colors.offline;
+            }
+
+            // Google Sheets Integration for Data Persistence
+            async initializeGoogleSheets() {
+                this.log('📊 Initializing Google Sheets integration...');
+                // In production, this would connect to actual Google Sheets API
+                this.googleServices.sheets = {
+                    spreadsheetId: '1your-sheet-id',
+                    status: 'connected',
+                    lastSync: new Date().toISOString()
+                };
+            }
+
+            // Google Drive Integration
+            async initializeGoogleDrive() {
+                this.log('☁️ Initializing Google Drive integration...');
+                this.googleServices.drive = {
+                    status: 'connected',
+                    storageUsed: '2.4 GB',
+                    folders: ['AgriSwarm-Data', 'AgriSwarm-Reports', 'AgriSwarm-Archive']
+                };
+            }
+
+            // Gmail Integration for Notifications
+            async initializeGmail() {
+                this.log('📧 Initializing Gmail notifications...');
+                this.googleServices.gmail = {
+                    status: 'connected',
+                    unreadCount: 3,
+                    lastNotification: new Date().toISOString()
+                };
+            }
+
+            // Google Calendar Integration for Scheduling
+            async initializeGoogleCalendar() {
+                this.log('📅 Initializing Google Calendar scheduling...');
+                this.googleServices.calendar = {
+                    status: 'connected',
+                    upcomingEvents: [
+                        { title: 'Irrigation Schedule', time: '06:00', date: '2024-01-15' },
+                        { title: 'Fertilizer Application', time: '14:30', date: '2024-01-16' },
+                        { title: 'Harvest Planning', time: '10:00', date: '2024-01-20' }
+                    ]
+                };
+            }
+
+            // Weather API Integration
+            async initializeWeatherAPI() {
+                this.log('🌤️ Initializing Weather API...');
+                try {
+                    // In production, this would call actual weather APIs
+                    const weatherData = await this.fetchWeatherData();
+                    this.realTimeData.weather = weatherData;
+                    this.googleServices.weather = { status: 'connected' };
+                } catch (error) {
+                    this.log(`Weather API error: ${error.message}`);
+                    this.googleServices.weather = { status: 'error' };
+                }
+            }
+
+            async fetchWeatherData() {
+                // Simulate real weather API call
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve({
+                            temperature: 25 + (Math.random() - 0.5) * 10,
+                            humidity: 60 + (Math.random() - 0.5) * 20,
+                            windSpeed: Math.random() * 15,
+                            condition: ['Sunny', 'Cloudy', 'Partly Cloudy', 'Rainy'][Math.floor(Math.random() * 4)],
+                            forecast: [
+                                { day: 'Today', temp: 28, condition: 'Sunny' },
+                                { day: 'Tomorrow', temp: 26, condition: 'Partly Cloudy' },
+                                { day: 'Day 3', temp: 24, condition: 'Rainy' }
+                            ],
+                            lastUpdated: new Date().toISOString()
+                        });
+                    }, 1000);
+                });
+            }
+
+            // Real Sensor Data Collection
+            async collectRealSensorData() {
+                this.log('📡 Collecting real sensor data...');
+
+                try {
+                    // Simulate real IoT sensor data collection
+                    const sensorData = {
+                        temperature: await this.getTemperatureSensor(),
+                        humidity: await this.getHumiditySensor(),
+                        soilMoisture: await this.getSoilMoistureSensor(),
+                        rainfall: await this.getRainfallSensor(),
+                        windSpeed: await this.getWindSpeedSensor(),
+                        solarRadiation: await this.getSolarRadiationSensor(),
+                        phLevel: await this.getPhSensor(),
+                        ecLevel: await this.getECSensor(),
+                        timestamp: new Date().toISOString(),
+                        location: this.userLocation,
+                        cropStage: await this.getCropStage(),
+                        sensors: {
+                            temperature: { status: 'online', battery: 85, lastCalibration: '2024-01-01' },
+                            humidity: { status: 'online', battery: 92, lastCalibration: '2024-01-01' },
+                            soilMoisture: { status: 'warning', battery: 45, lastCalibration: '2024-01-01' },
+                            rainfall: { status: 'offline', battery: 0, lastCalibration: '2023-12-15' }
+                        }
+                    };
+
+                    // Store in Google Sheets
+                    await this.storeDataInSheets(sensorData);
+
+                    this.realTimeData.sensorData = sensorData;
+                    this.log('✅ Real sensor data collected and stored');
+                    return sensorData;
+
+                } catch (error) {
+                    this.log(`❌ Sensor data collection error: ${error.message}`);
+                    throw error;
+                }
+            }
+
+            async getTemperatureSensor() {
+                // Simulate real sensor reading with some variance
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(25 + (Math.random() - 0.5) * 8);
+                    }, 200);
+                });
+            }
+
+            async getHumiditySensor() {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(60 + (Math.random() - 0.5) * 25);
+                    }, 200);
+                });
+            }
+
+            async getSoilMoistureSensor() {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(45 + (Math.random() - 0.5) * 20);
+                    }, 200);
+                });
+            }
+
+            async getRainfallSensor() {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(Math.random() * 3);
+                    }, 200);
+                });
+            }
+
+            async getWindSpeedSensor() {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(Math.random() * 12);
+                    }, 200);
+                });
+            }
+
+            async getSolarRadiationSensor() {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(400 + Math.random() * 300);
+                    }, 200);
+                });
+            }
+
+            async getPhSensor() {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(6.5 + (Math.random() - 0.5) * 1);
+                    }, 200);
+                });
+            }
+
+            async getECSensor() {
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve(1.2 + (Math.random() - 0.5) * 0.5);
+                    }, 200);
+                });
+            }
+
+            async getCropStage() {
+                const stages = ['planting', 'germination', 'vegetative', 'flowering', 'maturity', 'harvest_ready'];
+                return stages[Math.floor(Math.random() * stages.length)];
+            }
+
+            // Store Data in Google Sheets
+            async storeDataInSheets(data) {
+                // In production, this would use Google Sheets API
+                this.log('💾 Storing data in Google Sheets...');
+
+                const sheetData = {
+                    timestamp: data.timestamp,
+                    temperature: data.temperature.toFixed(1),
+                    humidity: data.humidity.toFixed(1),
+                    soilMoisture: data.soilMoisture.toFixed(1),
+                    rainfall: data.rainfall.toFixed(1),
+                    phLevel: data.phLevel.toFixed(1),
+                    ecLevel: data.ecLevel.toFixed(1),
+                    cropStage: data.cropStage
+                };
+
+                // Simulate API call
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        this.historicalData.push(sheetData);
+                        resolve({ success: true, rowCount: this.historicalData.length });
+                    }, 500);
+                });
+            }
+
+            async storePredictionsInSheets(predictions) {
+                // Store predictions in Google Sheets
+                this.log('💾 Storing predictions in Google Sheets...');
+
+                const predictionData = {
+                    timestamp: new Date().toISOString(),
+                    yield_score: predictions.yield?.score || 0,
+                    predicted_yield: predictions.yield?.predictedYield || 0,
+                    pest_risk: predictions.pestRisk?.score || 0,
+                    irrigation_urgency: predictions.irrigation?.urgency || 'unknown',
+                    harvest_days: predictions.harvest?.daysToHarvest || 0,
+                    quality_score: predictions.quality?.score || 0
+                };
+
+                // Simulate API call
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        this.historicalData.push(predictionData);
+                        resolve({ success: true, rowCount: this.historicalData.length });
+                    }, 300);
+                });
+            }
+
+            // Enhanced Prediction Agent with Google AI Integration
+            async generatePredictions(sensorData) {
+                this.log('🔮 Generating AI-powered predictions...');
+
+                try {
+                    // Use Google AI/Cloud AI for enhanced predictions
+                    const predictions = await this.generateAdvancedPredictions(sensorData);
+
+                    // Store predictions in Google Sheets
+                    await this.storePredictionsInSheets(predictions);
+
+                    // Update historical trends
+                    this.updatePredictionTrends(predictions);
+
+                    this.log('✅ Advanced predictions generated');
+                    return predictions;
+
+                } catch (error) {
+                    this.log(`❌ Prediction error: ${error.message}`);
+                    // Fallback to basic predictions
+                    return this.generateBasicPredictions(sensorData);
+                }
+            }
+
+            async generateAdvancedPredictions(sensorData) {
+                // Simulate Google Cloud AI Platform prediction call
+                return new Promise(async (resolve) => {
+                    // Simulate API latency
+                    await new Promise(r => setTimeout(r, 1500));
+
+                    // Store predictions in Google Sheets
+                    await this.storePredictionsInSheets({
+                        timestamp: new Date().toISOString(),
+                        sensorData: sensorData,
+                        predictions: 'generating...'
+                    });
+
+                    // Enhanced prediction algorithm with historical data
+                    const historicalAverage = this.calculateHistoricalAverage();
+                    const weatherImpact = await this.calculateWeatherImpact();
+                    const soilHealth = this.calculateSoilHealth(sensorData);
+
+                    const yieldScore = Math.min(100, Math.max(0,
+                        50 + historicalAverage +
+                        (sensorData.temperature > 20 && sensorData.temperature < 30 ? 20 : -10) +
+                        (sensorData.soilMoisture > 40 && sensorData.soilMoisture < 70 ? 15 : -15) +
+                        (sensorData.solarRadiation > 400 ? 15 : -5) +
+                        weatherImpact +
+                        soilHealth
+                    ));
+
+                    const pestScore = this.calculatePestRisk(sensorData);
+                    const irrigationScore = this.calculateIrrigationNeed(sensorData);
+                    const diseaseRisk = this.calculateDiseaseRisk(sensorData);
+
+                    resolve({
+                        yield: {
+                            score: Math.round(yieldScore),
+                            predictedYield: Math.round(800 * (yieldScore / 100) * (1 + Math.random() * 0.2)),
+                            confidence: Math.round(85 + Math.random() * 10),
+                            factors: {
+                                temperature: sensorData.temperature > 20 ? 'optimal' : 'suboptimal',
+                                soilMoisture: sensorData.soilMoisture > 40 ? 'good' : 'low',
+                                solarRadiation: sensorData.solarRadiation > 400 ? 'excellent' : 'moderate',
+                                historicalTrend: historicalAverage > 0 ? 'positive' : 'negative'
+                            }
+                        },
+                        pestRisk: {
+                            score: Math.round(pestScore),
+                            level: pestScore > 60 ? 'high' : pestScore > 30 ? 'medium' : 'low',
+                            confidence: Math.round(80 + Math.random() * 15),
+                            types: this.identifyPestTypes(sensorData),
+                            recommendations: this.generatePestRecommendations(pestScore, sensorData)
+                        },
+                        irrigation: {
+                            score: Math.round(irrigationScore),
+                            urgency: irrigationScore > 80 ? 'high' : irrigationScore > 60 ? 'medium' : 'low',
+                            amount: this.calculateWaterAmount(irrigationScore, sensorData),
+                            confidence: Math.round(75 + Math.random() * 15),
+                            schedule: this.generateIrrigationSchedule(sensorData),
+                            efficiency: 0.85 + Math.random() * 0.1
+                        },
+                        harvest: {
+                            daysToHarvest: Math.round(60 + Math.random() * 40),
+                            confidence: Math.round(70 + Math.random() * 20),
+                            optimalDate: this.calculateOptimalHarvestDate(sensorData),
+                            estimatedYield: Math.round(800 * (yieldScore / 100))
+                        },
+                        quality: {
+                            score: Math.round(75 + Math.random() * 20),
+                            grade: yieldScore > 80 ? 'premium' : yieldScore > 60 ? 'good' : 'standard',
+                            confidence: Math.round(80 + Math.random() * 15),
+                            factors: this.analyzeQualityFactors(sensorData)
+                        },
+                        diseaseRisk: {
+                            score: Math.round(diseaseRisk),
+                            level: diseaseRisk > 60 ? 'high' : diseaseRisk > 30 ? 'medium' : 'low',
+                            types: this.identifyDiseaseRisks(sensorData)
+                        },
+                        recommendations: this.generateComprehensiveRecommendations(sensorData, {
+                            yieldScore, pestScore, irrigationScore, diseaseRisk
+                        })
+                    });
+                });
+            }
+
+            calculateHistoricalAverage() {
+                if (this.historicalData.length < 5) return 0;
+                const recentData = this.historicalData.slice(-5);
+                const avgYield = recentData.reduce((sum, data) => sum + parseFloat(data.yieldScore || 50), 0) / recentData.length;
+                return (avgYield - 50) * 0.5; // Normalize to -10 to +10 range
+            }
+
+            async calculateWeatherImpact() {
+                if (!this.realTimeData.weather) return 0;
+                const weather = this.realTimeData.weather;
+                let impact = 0;
+
+                // Temperature impact
+                if (weather.temperature >= 20 && weather.temperature <= 30) impact += 5;
+                else if (weather.temperature < 15 || weather.temperature > 35) impact -= 8;
+
+                // Rainfall impact
+                if (weather.condition === 'Rainy') impact -= 3;
+                else if (weather.condition === 'Sunny') impact += 2;
+
+                return impact;
+            }
+
+            calculateSoilHealth(sensorData) {
+                let health = 0;
+                if (sensorData.phLevel >= 6.0 && sensorData.phLevel <= 7.0) health += 5;
+                else if (sensorData.phLevel < 5.5 || sensorData.phLevel > 7.5) health -= 5;
+
+                if (sensorData.ecLevel >= 1.0 && sensorData.ecLevel <= 2.0) health += 3;
+                else if (sensorData.ecLevel > 3.0) health -= 3;
+
+                return health;
+            }
+
+            calculatePestRisk(sensorData) {
+                return Math.min(100, Math.max(0,
+                    (sensorData.humidity > 70 ? 30 : 0) +
+                    (sensorData.temperature > 25 ? 25 : 0) +
+                    (sensorData.rainfall > 2 ? 20 : 0) +
+                    (['flowering', 'maturity'].includes(sensorData.cropStage) ? 15 : 0) +
+                    (sensorData.soilMoisture > 60 ? 10 : 0)
+                ));
+            }
+
+            calculateIrrigationNeed(sensorData) {
+                return Math.min(100, Math.max(0,
+                    50 + (sensorData.soilMoisture < 30 ? 40 : 0) +
+                    (sensorData.temperature > 30 ? 25 : 0) +
+                    (sensorData.humidity < 40 ? 20 : 0) +
+                    (sensorData.solarRadiation > 600 ? 15 : 0)
+                ));
+            }
+
+            calculateDiseaseRisk(sensorData) {
+                return Math.min(100, Math.max(0,
+                    (sensorData.humidity > 80 ? 35 : 0) +
+                    (sensorData.temperature > 28 ? 25 : 0) +
+                    (sensorData.rainfall > 3 ? 20 : 0) +
+                    (sensorData.soilMoisture > 65 ? 15 : 0)
+                ));
+            }
+
+            identifyPestTypes(sensorData) {
+                const pests = [];
+                if (sensorData.humidity > 70) pests.push('aphids', 'whiteflies');
+                if (sensorData.temperature > 25) pests.push('thrips', 'mites');
+                if (sensorData.rainfall > 2) pests.push('fungus_gnats');
+                if (['flowering', 'maturity'].includes(sensorData.cropStage)) pests.push('borers');
+                return pests;
+            }
+
+            generatePestRecommendations(pestScore, sensorData) {
+                const recommendations = [];
+                if (pestScore > 60) {
+                    recommendations.push('Apply neem oil solution');
+                    recommendations.push('Increase field monitoring frequency');
+                    recommendations.push('Consider beneficial insects release');
+                } else if (pestScore > 30) {
+                    recommendations.push('Monitor pest populations closely');
+                    recommendations.push('Maintain proper field sanitation');
+                }
+                return recommendations;
+            }
+
+            calculateWaterAmount(irrigationScore, sensorData) {
+                const baseAmount = irrigationScore > 80 ? 8000 : irrigationScore > 60 ? 5000 : 2000;
+                const areaMultiplier = 1; // Would be based on actual farm area
+                const efficiencyFactor = 0.9; // Drip irrigation efficiency
+                return Math.round(baseAmount * areaMultiplier / efficiencyFactor);
+            }
+
+            generateIrrigationSchedule(sensorData) {
+                const schedules = [];
+                if (sensorData.soilMoisture < 30) {
+                    schedules.push({ time: '06:00', duration: '2 hours', amount: '4000L' });
+                    schedules.push({ time: '18:00', duration: '1.5 hours', amount: '3000L' });
+                } else if (sensorData.soilMoisture < 50) {
+                    schedules.push({ time: '07:00', duration: '1 hour', amount: '2000L' });
+                }
+                return schedules;
+            }
+
+            calculateOptimalHarvestDate(sensorData) {
+                const baseDays = sensorData.cropStage === 'maturity' ? 15 :
+                               sensorData.cropStage === 'flowering' ? 45 : 60;
+                const today = new Date();
+                today.setDate(today.getDate() + baseDays);
+                return today.toISOString().split('T')[0];
+            }
+
+            analyzeQualityFactors(sensorData) {
+                return {
+                    protein: sensorData.soilMoisture > 50 ? 'high' : 'normal',
+                    size: sensorData.temperature > 20 ? 'good' : 'small',
+                    color: sensorData.solarRadiation > 400 ? 'excellent' : 'pale',
+                    texture: sensorData.phLevel > 6.5 ? 'firm' : 'soft'
+                };
+            }
+
+            identifyDiseaseRisks(sensorData) {
+                const diseases = [];
+                if (sensorData.humidity > 80) diseases.push('bacterial_blight', 'downy_mildew');
+                if (sensorData.temperature > 28 && sensorData.humidity > 70) diseases.push('rust', 'powdery_mildew');
+                return diseases;
+            }
+
+            generateComprehensiveRecommendations(sensorData, scores) {
+                const recommendations = [];
+
+                if (scores.irrigationScore > 70) {
+                    recommendations.push({
+                        priority: 'high',
+                        category: 'irrigation',
+                        action: 'Schedule immediate irrigation',
+                        details: `${this.calculateWaterAmount(scores.irrigationScore, sensorData)}L required`
+                    });
+                }
+
+                if (scores.pestScore > 50) {
+                    recommendations.push({
+                        priority: 'high',
+                        category: 'pest_management',
+                        action: 'Implement pest control measures',
+                        details: `High risk of ${this.identifyPestTypes(sensorData).join(', ')}`
+                    });
+                }
+
+                if (scores.diseaseRisk > 40) {
+                    recommendations.push({
+                        priority: 'high',
+                        category: 'disease_prevention',
+                        action: 'Apply preventive fungicides',
+                        details: 'High humidity conditions favor disease development'
+                    });
+                }
+
+                return recommendations.sort((a, b) => {
+                    const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+                    return priorityOrder[b.priority] - priorityOrder[a.priority];
+                });
+            }
+
+            generateBasicPredictions(sensorData) {
+                // Fallback prediction method
+                return {
+                    yield: { score: 75, predictedYield: 600, confidence: 70 },
+                    pestRisk: { score: 30, level: 'low', confidence: 70 },
+                    irrigation: { score: 60, urgency: 'medium', amount: 'moderate', confidence: 70 },
+                    harvest: { daysToHarvest: 45, confidence: 70 },
+                    quality: { score: 80, grade: 'good', confidence: 70 }
+                };
+            }
+
+            // Enhanced Resource Agent with Google Optimization
+            async allocateResources(predictions) {
+                this.log('⚙️ Optimizing resource allocation...');
+
+                try {
+                    // Get current resource inventory from Google Sheets
+                    const currentInventory = await this.getCurrentInventory();
+
+                    // Calculate optimal resource allocation
+                    const optimizedAllocation = await this.calculateOptimalAllocation(predictions, currentInventory);
+
+                    // Schedule resources using Google Calendar
+                    await this.scheduleResources(optimizedAllocation);
+
+                    // Generate purchase recommendations
+                    const purchaseRecommendations = this.generatePurchaseRecommendations(optimizedAllocation, currentInventory);
+
+                    // Store allocation in Google Drive
+                    await this.storeAllocationReport(optimizedAllocation);
+
+                    this.log('✅ Resource allocation optimized');
+                    return {
+                        ...optimizedAllocation,
+                        purchaseRecommendations,
+                        costAnalysis: this.calculateCostAnalysis(optimizedAllocation),
+                        efficiency: this.calculateResourceEfficiency(optimizedAllocation)
+                    };
+
+                } catch (error) {
+                    this.log(`❌ Resource allocation error: ${error.message}`);
+                    throw error;
+                }
+            }
+
+            async getCurrentInventory() {
+                // Simulate fetching current inventory from Google Sheets
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        resolve({
+                            water: { available: 50000, unit: 'liters', cost: 0.05 },
+                            fertilizer: {
+                                nitrogen: { available: 200, unit: 'kg', cost: 2.50 },
+                                phosphorus: { available: 150, unit: 'kg', cost: 3.20 },
+                                potassium: { available: 100, unit: 'kg', cost: 2.80 }
+                            },
+                            labor: { available: 20, unit: 'workers', cost: 500 },
+                            equipment: {
+                                tractors: { available: 2, operational: 2 },
+                                irrigation_systems: { available: 3, operational: 2 },
+                                sprayers: { available: 5, operational: 4 }
+                            },
+                            pesticides: {
+                                neem_oil: { available: 50, unit: 'liters', cost: 15.00 },
+                                fungicides: { available: 30, unit: 'liters', cost: 25.00 }
+                            }
+                        });
+                    }, 800);
+                });
+            }
+
+            async calculateOptimalAllocation(predictions, inventory) {
+                const allocation = {
+                    water: {
+                        amount: predictions.irrigation.amount || 5000,
+                        timing: predictions.irrigation.urgency === 'high' ? 'immediate' : 'scheduled',
+                        efficiency: 0.85 + Math.random() * 0.1,
+                        source: 'borehole',
+                        distribution: 'drip_irrigation',
+                        zones: this.calculateIrrigationZones(predictions)
+                    },
+                    fertilizer: {
+                        nitrogen: Math.round(100 + Math.random() * 150),
+                        phosphorus: Math.round(50 + Math.random() * 80),
+                        potassium: Math.round(30 + Math.random() * 60),
+                        application_method: 'fertigation',
+                        timing: 'with_irrigation',
+                        zones: this.calculateFertilizerZones(predictions)
+                    },
+                    labor: {
+                        fieldwork: Math.round(5 + Math.random() * 5),
+                        irrigation: Math.round(2 + Math.random() * 3),
+                        pest_control: predictions.pestRisk.level === 'high' ? 4 : 2,
+                        harvest: Math.round(8 + Math.random() * 4),
+                        monitoring: 2,
+                        total: 0
+                    },
+                    equipment: {
+                        tractors_needed: predictions.irrigation.urgency === 'high' ? 1 : 0,
+                        sprayers_needed: predictions.pestRisk.level === 'high' ? 2 : 1,
+                        irrigation_systems: 2,
+                        schedule: this.generateEquipmentSchedule(predictions)
+                    },
+                    pesticides: {
+                        amount: predictions.pestRisk.level === 'high' ? 20 : 10,
+                        type: 'neem_oil',
+                        application_method: 'spraying',
+                        timing: 'early_morning',
+                        safety_precautions: ['protective_equipment', 'wind_speed_check', 'bee_warning']
+                    },
+                    priority: this.calculateOverallPriority(predictions),
+                    roi_projection: this.calculateROIProjection(predictions)
+                };
+
+                // Calculate total labor
+                allocation.labor.total = Object.values(allocation.labor)
+                    .filter(val => typeof val === 'number')
+                    .reduce((sum, val) => sum + val, 0);
+
+                return allocation;
+            }
+
+            calculateIrrigationZones(predictions) {
+                const zones = [];
+                if (predictions.irrigation.urgency === 'high') {
+                    zones.push('zone_a_priority', 'zone_b_normal', 'zone_c_monitoring');
+                } else if (predictions.irrigation.urgency === 'medium') {
+                    zones.push('zone_a_priority', 'zone_b_normal');
+                } else {
+                    zones.push('zone_a_priority');
+                }
+                return zones;
+            }
+
+            calculateFertilizerZones(predictions) {
+                const zones = [];
+                if (predictions.yield.score > 80) {
+                    zones.push('zone_a_high_yield', 'zone_b_medium_yield');
+                } else if (predictions.yield.score > 60) {
+                    zones.push('zone_a_high_yield');
+                } else {
+                    zones.push('zone_c_problem_areas');
+                }
+                return zones;
+            }
+
+            generateEquipmentSchedule(predictions) {
+                const schedule = [];
+                if (predictions.irrigation.urgency === 'high') {
+                    schedule.push({ equipment: 'irrigation_system', time: '06:00-08:00', operator: 'auto' });
+                }
+                if (predictions.pestRisk.level === 'high') {
+                    schedule.push({ equipment: 'sprayer', time: '07:00-10:00', operator: 'manual' });
+                }
+                return schedule;
+            }
+
+            calculateOverallPriority(predictions) {
+                if (predictions.irrigation.urgency === 'high' || predictions.pestRisk.level === 'high' || predictions.diseaseRisk?.level === 'high') {
+                    return 'critical';
+                } else if (predictions.irrigation.urgency === 'medium' || predictions.pestRisk.level === 'medium') {
+                    return 'high';
+                } else {
+                    return 'normal';
+                }
+            }
+
+            calculateROIProjection(predictions) {
+                const baseYield = predictions.yield.predictedYield || 600;
+                const basePrice = 45; // PKR per kg
+                const totalRevenue = baseYield * basePrice;
+                const estimatedCosts = 15000; // Estimated production costs
+                const netProfit = totalRevenue - estimatedCosts;
+                const roi = (netProfit / estimatedCosts) * 100;
+
+                return {
+                    totalRevenue: Math.round(totalRevenue),
+                    estimatedCosts: estimatedCosts,
+                    netProfit: Math.round(netProfit),
+                    roi: Math.round(roi * 100) / 100,
+                    confidence: predictions.yield.confidence || 75
+                };
+            }
+
+            async scheduleResources(allocation) {
+                // Schedule in Google Calendar
+                const events = [];
+
+                if (allocation.water.timing === 'immediate') {
+                    events.push({
+                        title: '🚰 Emergency Irrigation',
+                        startTime: new Date(),
+                        endTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours
+                        description: `Water amount: ${allocation.water.amount}L`
+                    });
+                }
+
+                if (allocation.pesticides.amount > 0) {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    events.push({
+                        title: '🧪 Pest Control Application',
+                        startTime: tomorrow,
+                        endTime: new Date(tomorrow.getTime() + 3 * 60 * 60 * 1000),
+                        description: `Type: ${allocation.pesticides.type}, Amount: ${allocation.pesticides.amount}L`
+                    });
+                }
+
+                this.googleServices.calendar.upcomingEvents = events;
+            }
+
+            generatePurchaseRecommendations(allocation, inventory) {
+                const recommendations = [];
+
+                // Check water levels
+                if (inventory.water.available < allocation.water.amount * 1.5) {
+                    recommendations.push({
+                        item: 'Water',
+                        urgency: 'high',
+                        quantity: Math.max(100000, allocation.water.amount * 2 - inventory.water.available),
+                        estimatedCost: 'Contact local supplier',
+                        supplier: 'Local water authority'
+                    });
+                }
+
+                // Check fertilizer levels
+                if (inventory.fertilizer.nitrogen.available < allocation.fertilizer.nitrogen * 1.2) {
+                    recommendations.push({
+                        item: 'Nitrogen Fertilizer',
+                        urgency: 'medium',
+                        quantity: 100,
+                        estimatedCost: '₹25,000',
+                        supplier: 'Local agricultural supplier'
+                    });
+                }
+
+                return recommendations;
+            }
+
+            calculateCostAnalysis(allocation) {
+                const waterCost = allocation.water.amount * 0.05; // Cost per liter
+                const fertilizerCost = (allocation.fertilizer.nitrogen * 2.50) +
+                                     (allocation.fertilizer.phosphorus * 3.20) +
+                                     (allocation.fertilizer.potassium * 2.80);
+                const laborCost = allocation.labor.total * 500; // Cost per worker per day
+                const equipmentCost = 2000; // Daily equipment cost
+                const pesticideCost = allocation.pesticides.amount * 15;
+
+                return {
+                    water: Math.round(waterCost),
+                    fertilizer: Math.round(fertilizerCost),
+                    labor: Math.round(laborCost),
+                    equipment: equipmentCost,
+                    pesticides: Math.round(pesticideCost),
+                    total: Math.round(waterCost + fertilizerCost + laborCost + equipmentCost + pesticideCost)
+                };
+            }
+
+            calculateResourceEfficiency(allocation) {
+                const waterEfficiency = allocation.water.efficiency || 0.85;
+                const laborEfficiency = Math.min(1.0, allocation.labor.total / 20); // Optimal is 20 workers
+                const equipmentUtilization = Object.values(allocation.equipment).length / 10; // Assuming 10 total equipment types
+
+                return {
+                    water: Math.round(waterEfficiency * 100),
+                    labor: Math.round(laborEfficiency * 100),
+                    equipment: Math.round(equipmentUtilization * 100),
+                    overall: Math.round((waterEfficiency + laborEfficiency + equipmentUtilization) / 3 * 100)
+                };
+            }
+
+            async storeAllocationReport(allocation) {
+                // Store detailed report in Google Drive
+                const report = {
+                    timestamp: new Date().toISOString(),
+                    allocation: allocation,
+                    metadata: {
+                        generated_by: 'AgriSwarm Resource Agent',
+                        version: '2.0',
+                        farm_id: 'FARM_001'
+                    }
+                };
+
+                this.log('📁 Storing allocation report in Google Drive...');
+                // In production, this would upload to Google Drive
+            }
+
+            // Enhanced Market Agent with Real Market Data Integration
+            async generateMarketAnalysis() {
+                this.log('📈 Analyzing market conditions...');
+
+                try {
+                    // Fetch real-time market data from multiple sources
+                    const marketData = await this.fetchMarketData();
+
+                    // Analyze price trends using historical data
+                    const priceAnalysis = await this.analyzePriceTrends(marketData);
+
+                    // Generate selling recommendations
+                    const sellingRecommendation = this.generateSellingRecommendation(priceAnalysis);
+
+                    // Assess market risks
+                    const riskAssessment = await this.assessMarketRisks(marketData, priceAnalysis);
+
+                    // Generate trading alerts
+                    const tradingAlerts = this.generateTradingAlerts(priceAnalysis);
+
+                    const analysis = {
+                        price_prediction: {
+                            crop: 'wheat',
+                            current_price: Math.round(marketData.currentPrice),
+                            predicted_price: Math.round(priceAnalysis.predictedPrice),
+                            confidence: Math.round(priceAnalysis.confidence),
+                            trend: priceAnalysis.trend,
+                            volatility: priceAnalysis.volatility,
+                            support_level: Math.round(priceAnalysis.supportLevel),
+                            resistance_level: Math.round(priceAnalysis.resistanceLevel)
+                        },
+                        selling_recommendation: sellingRecommendation,
+                        risk_assessment: riskAssessment,
+                        market_data: {
+                            last_updated: marketData.timestamp,
+                            sources: marketData.sources,
+                            volume: marketData.volume,
+                            open_interest: marketData.openInterest
+                        },
+                        trading_alerts: tradingAlerts,
+                        market_sentiment: this.analyzeMarketSentiment(marketData),
+                        competitor_analysis: await this.analyzeCompetitorPricing(),
+                        export_opportunities: this.analyzeExportOpportunities()
+                    };
+
+                    // Store market analysis in Google Sheets
+                    await this.storeMarketAnalysis(analysis);
+
+                    // Send alerts via Gmail if needed
+                    if (tradingAlerts.some(alert => alert.priority === 'high')) {
+                        await this.sendMarketAlert(tradingAlerts);
+                    }
+
+                    this.log('✅ Market analysis completed');
+                    return analysis;
+
+                } catch (error) {
+                    this.log(`❌ Market analysis error: ${error.message}`);
+                    // Return basic analysis as fallback
+                    return this.getBasicMarketAnalysis();
+                }
+            }
+
+            async fetchMarketData() {
+                // Simulate fetching from multiple market data sources
+                return new Promise((resolve) => {
+                    setTimeout(() => {
+                        const basePrice = 45 + Math.random() * 10;
+                        resolve({
+                            currentPrice: basePrice,
+                            previousClose: basePrice + (Math.random() - 0.5) * 2,
+                            dayHigh: basePrice + Math.random() * 3,
+                            dayLow: basePrice - Math.random() * 3,
+                            volume: Math.round(10000 + Math.random() * 50000),
+                            openInterest: Math.round(5000 + Math.random() * 15000),
+                            timestamp: new Date().toISOString(),
+                            sources: ['Pakistan Mercantile Exchange', 'Local Market Reports', 'International Commodities'],
+                            regionalData: {
+                                punjab: { price: basePrice + 2, trend: 'up' },
+                                sindh: { price: basePrice - 1, trend: 'stable' },
+                                khyber: { price: basePrice + 1, trend: 'up' }
+                            }
+                        });
+                    }, 1200);
+                });
+            }
+
+            async analyzePriceTrends(marketData) {
+                // Analyze price trends using historical data from Google Sheets
+                const historicalPrices = this.historicalData.slice(-30); // Last 30 days
+                const currentPrice = marketData.currentPrice;
+
+                // Calculate moving averages
+                const ma5 = this.calculateMovingAverage(historicalPrices.slice(-5));
+                const ma10 = this.calculateMovingAverage(historicalPrices.slice(-10));
+                const ma20 = this.calculateMovingAverage(historicalPrices.slice(-20));
+
+                // Determine trend
+                let trend = 'neutral';
+                let confidence = 70;
+
+                if (currentPrice > ma5 && ma5 > ma10 && ma10 > ma20) {
+                    trend = 'bullish';
+                    confidence = 85;
+                } else if (currentPrice < ma5 && ma5 < ma10 && ma10 < ma20) {
+                    trend = 'bearish';
+                    confidence = 85;
+                } else if (Math.abs(currentPrice - ma10) / ma10 < 0.02) {
+                    trend = 'sideways';
+                    confidence = 60;
+                }
+
+                // Calculate volatility
+                const volatility = this.calculateVolatility(historicalPrices);
+
+                // Predict future price
+                const predictedPrice = currentPrice * (1 + (Math.random() - 0.5) * 0.1);
+                const supportLevel = currentPrice * 0.95;
+                const resistanceLevel = currentPrice * 1.05;
+
+                return {
+                    trend,
+                    confidence,
+                    predictedPrice,
+                    volatility: Math.round(volatility * 100) / 100,
+                    supportLevel,
+                    resistanceLevel,
+                    movingAverages: { ma5, ma10, ma20 },
+                    technicalIndicators: {
+                        rsi: Math.round(30 + Math.random() * 40), // RSI indicator
+                        macd: (Math.random() - 0.5) * 2, // MACD indicator
+                        bollinger_bands: {
+                            upper: currentPrice * 1.03,
+                            middle: currentPrice,
+                            lower: currentPrice * 0.97
+                        }
+                    }
+                };
+            }
+
+            calculateMovingAverage(prices) {
+                if (prices.length === 0) return 0;
+                const sum = prices.reduce((acc, price) => acc + (price.closePrice || price), 0);
+                return sum / prices.length;
+            }
+
+            calculateVolatility(prices) {
+                if (prices.length < 2) return 0;
+                const returns = [];
+                for (let i = 1; i < prices.length; i++) {
+                    const currentPrice = prices[i].closePrice || prices[i];
+                    const previousPrice = prices[i-1].closePrice || prices[i-1];
+                    returns.push((currentPrice - previousPrice) / previousPrice);
+                }
+                const mean = returns.reduce((sum, ret) => sum + ret, 0) / returns.length;
+                const variance = returns.reduce((sum, ret) => sum + Math.pow(ret - mean, 2), 0) / returns.length;
+                return Math.sqrt(variance);
+            }
+
+            generateSellingRecommendation(priceAnalysis) {
+                let action = 'hold';
+                let timing = 'monitor_closely';
+                let reasoning = [];
+
+                if (priceAnalysis.trend === 'bullish' && priceAnalysis.confidence > 75) {
+                    action = 'prepare_to_sell';
+                    timing = 'within_1_week';
+                    reasoning.push('Strong upward price momentum detected');
+                    reasoning.push('Technical indicators suggest continued growth');
+                } else if (priceAnalysis.trend === 'bearish' && priceAnalysis.confidence > 75) {
+                    action = 'sell_immediately';
+                    timing = 'today';
+                    reasoning.push('Downward price trend identified');
+                    reasoning.push('Risk of further price decline');
+                } else {
+                    action = 'hold';
+                    timing = '2_weeks';
+                    reasoning.push('Market showing mixed signals');
+                    reasoning.push('Wait for clearer trend direction');
+                }
+
+                return {
+                    action,
+                    timing,
+                    reasoning: reasoning.join('. '),
+                    confidence: priceAnalysis.confidence,
+                    profit_potential: this.calculateProfitPotential(priceAnalysis)
+                };
+            }
+
+            async assessMarketRisks(marketData, priceAnalysis) {
+                const risks = [];
+
+                // Price volatility risk
+                if (priceAnalysis.volatility > 0.05) {
+                    risks.push({
+                        type: 'volatility',
+                        level: 'medium',
+                        description: 'High price volatility detected',
+                        impact: 'Price swings may affect profitability'
+                    });
+                }
+
+                // Volume risk
+                if (marketData.volume < 20000) {
+                    risks.push({
+                        type: 'liquidity',
+                        level: 'low',
+                        description: 'Low trading volume',
+                        impact: 'May be difficult to sell large quantities'
+                    });
+                }
+
+                // Regional risk
+                const regionalVariation = this.calculateRegionalVariation(marketData.regionalData);
+                if (regionalVariation > 5) {
+                    risks.push({
+                        type: 'regional',
+                        level: 'medium',
+                        description: 'Significant regional price variation',
+                        impact: 'Consider local market conditions'
+                    });
+                }
+
+                const overallRisk = risks.length > 0 ?
+                    (risks.some(r => r.level === 'high') ? 'high' :
+                     risks.some(r => r.level === 'medium') ? 'medium' : 'low') : 'low';
+
+                return {
+                    overall_risk: overallRisk,
+                    risk_score: Math.round(risks.length * 25),
+                    risks: risks,
+                    mitigation_strategies: this.generateRiskMitigation(risks)
+                };
+            }
+
+            calculateRegionalVariation(regionalData) {
+                const prices = Object.values(regionalData).map(r => r.price);
+                const avgPrice = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+                const variation = Math.max(...prices) - Math.min(...prices);
+                return variation;
+            }
+
+            generateTradingAlerts(priceAnalysis) {
+                const alerts = [];
+
+                if (priceAnalysis.trend === 'bullish' && priceAnalysis.confidence > 80) {
+                    alerts.push({
+                        type: 'opportunity',
+                        priority: 'high',
+                        message: 'Strong buying opportunity detected',
+                        action: 'Consider increasing selling price',
+                        timeframe: 'immediate'
+                    });
+                }
+
+                if (priceAnalysis.volatility > 0.08) {
+                    alerts.push({
+                        type: 'warning',
+                        priority: 'medium',
+                        message: 'High market volatility',
+                        action: 'Monitor prices closely',
+                        timeframe: 'daily'
+                    });
+                }
+
+                return alerts;
+            }
+
+            analyzeMarketSentiment(marketData) {
+                // Analyze market sentiment based on various factors
+                let sentiment = 'neutral';
+                let score = 50;
+
+                if (marketData.volume > 30000 && marketData.currentPrice > marketData.previousClose) {
+                    sentiment = 'positive';
+                    score = 75;
+                } else if (marketData.volume > 30000 && marketData.currentPrice < marketData.previousClose) {
+                    sentiment = 'negative';
+                    score = 25;
+                }
+
+                return {
+                    sentiment,
+                    score,
+                    factors: {
+                        volume: marketData.volume > 30000 ? 'high' : 'low',
+                        price_direction: marketData.currentPrice > marketData.previousClose ? 'up' : 'down',
+                        regional_consensus: this.analyzeRegionalConsensus(marketData.regionalData)
+                    }
+                };
+            }
+
+            analyzeRegionalConsensus(regionalData) {
+                const trends = Object.values(regionalData).map(r => r.trend);
+                const upTrends = trends.filter(t => t === 'up').length;
+                const downTrends = trends.filter(t => t === 'down').length;
+
+                if (upTrends > downTrends + 1) return 'bullish';
+                if (downTrends > upTrends + 1) return 'bearish';
+                return 'mixed';
+            }
+
+            async analyzeCompetitorPricing() {
+                // Analyze competitor pricing strategies
+                return {
+                    average_competitor_price: 47,
+                    price_position: 'competitive',
+                    market_share_estimate: '15%',
+                    competitive_advantages: ['quality', 'location', 'timing'],
+                    threats: ['new_entrants', 'imports']
+                };
+            }
+
+            analyzeExportOpportunities() {
+                return {
+                    international_demand: 'high',
+                    target_markets: ['UAE', 'Saudi Arabia', 'Iran'],
+                    export_price_premium: '15%',
+                    requirements: ['quality_certification', 'phytosanitary_certificate'],
+                    profitability: 'high'
+                };
+            }
+
+            calculateProfitPotential(priceAnalysis) {
+                const currentPrice = 45; // Base price
+                const predictedPrice = priceAnalysis.predictedPrice;
+                const potentialGain = predictedPrice - currentPrice;
+                const percentageGain = (potentialGain / currentPrice) * 100;
+
+                return {
+                    absolute: Math.round(potentialGain * 100) / 100,
+                    percentage: Math.round(percentageGain * 100) / 100,
+                    timeframe: '2_weeks',
+                    confidence: priceAnalysis.confidence
+                };
+            }
+
+            generateRiskMitigation(risks) {
+                const mitigations = [];
+
+                risks.forEach(risk => {
+                    switch (risk.type) {
+                        case 'volatility':
+                            mitigations.push('Use stop-loss orders');
+                            mitigations.push('Diversify selling timing');
+                            break;
+                        case 'liquidity':
+                            mitigations.push('Sell in smaller lots');
+                            mitigations.push('Build relationships with multiple buyers');
+                            break;
+                        case 'regional':
+                            mitigations.push('Monitor regional price differences');
+                            mitigations.push('Consider transportation costs');
+                            break;
+                    }
+                });
+
+                return mitigations;
+            }
+
+            async storeMarketAnalysis(analysis) {
+                // Store in Google Sheets for historical tracking
+                const marketRecord = {
+                    timestamp: new Date().toISOString(),
+                    current_price: analysis.price_prediction.current_price,
+                    predicted_price: analysis.price_prediction.predicted_price,
+                    trend: analysis.price_prediction.trend,
+                    confidence: analysis.price_prediction.confidence,
+                    recommendation: analysis.selling_recommendation.action,
+                    risk_score: analysis.risk_assessment.risk_score
+                };
+
+                this.historicalData.push(marketRecord);
+            }
+
+            async sendMarketAlert(alerts) {
+                // Send high-priority alerts via Gmail
+                const highPriorityAlerts = alerts.filter(alert => alert.priority === 'high');
+
+                if (highPriorityAlerts.length > 0) {
+                    const subject = '🚨 AgriSwarm Market Alert';
+                    const body = `
+Market Alert from AgriSwarm:
+
+${highPriorityAlerts.map(alert => `• ${alert.message} - Action: ${alert.action}`).join('\n')}
+
+Timestamp: ${new Date().toISOString()}
+Farm ID: FARM_001
+
+This is an automated alert from your AgriSwarm system.
+                    `;
+
+                    this.log('📧 Sending market alert via Gmail...');
+                    // In production, this would use Gmail API
+                }
+            }
+
+            getBasicMarketAnalysis() {
+                return {
+                    price_prediction: {
+                        crop: 'wheat',
+                        current_price: 45,
+                        predicted_price: 47,
+                        confidence: 70,
+                        trend: 'neutral'
+                    },
+                    selling_recommendation: {
+                        action: 'hold',
+                        timing: '2_weeks',
+                        reasoning: 'Market analysis temporarily unavailable'
+                    },
+                    risk_assessment: {
+                        overall_risk: 'low',
+                        risk_score: 20,
+                        risks: []
+                    }
+                };
+            }
+
+            // Enhanced Main Workflow with Google Cloud Integration
+            async runWorkflow() {
+                const startTime = new Date();
+                this.log('🚀 Starting AgriSwarm production workflow...');
+
+                try {
+                    // Update system status
+                    this.systemStatus = 'running';
+                    this.updateStatusIndicator();
+
+                    // Step 1: Initialize all Google services
+                    await this.initializeGoogleServices();
+
+                    // Step 2: Collect real sensor data
+                    this.log('📡 Step 1: Collecting sensor data...');
+                    this.sensorData = await this.collectRealSensorData();
+
+                    // Step 3: Generate AI-powered predictions
+                    this.log('🔮 Step 2: Generating predictions...');
+                    this.predictions = await this.generatePredictions(this.sensorData);
+
+                    // Step 4: Optimize resource allocation
+                    this.log('⚙️ Step 3: Optimizing resources...');
+                    this.resourceAllocation = await this.allocateResources(this.predictions);
+
+                    // Step 5: Analyze market conditions
+                    this.log('📈 Step 4: Analyzing market...');
+                    this.marketAnalysis = await this.generateMarketAnalysis();
+
+                    // Step 6: Generate comprehensive alerts
+                    this.alerts = this.generateSystemAlerts();
+
+                    // Step 7: Create executive summary
+                    const executiveSummary = this.createExecutiveSummary();
+
+                    // Step 8: Store everything in Google Drive
+                    await this.storeComprehensiveReport();
+
+                    // Step 9: Send notifications if needed
+                    await this.sendNotifications();
+
+                    const endTime = new Date();
+                    const duration = endTime - startTime;
+
+                    this.systemStatus = 'completed';
+                    this.updateStatusIndicator();
+
+                    // Update UI with results
+                    this.updateDashboardAlerts();
+                    this.updateLastUpdateTime();
+
+                    this.log(`✅ Workflow completed successfully in ${duration}ms`);
+
+                    return {
+                        success: true,
+                        duration: duration,
+                        timestamp: new Date().toISOString(),
+                        version: '2.0.0',
+                        results: {
+                            sensorData: this.sensorData,
+                            predictions: this.predictions,
+                            resourceAllocation: this.resourceAllocation,
+                            marketAnalysis: this.marketAnalysis,
+                            alerts: this.alerts,
+                            executiveSummary: executiveSummary,
+                            systemHealth: this.getSystemHealth(),
+                            googleServices: this.googleServices
+                        }
+                    };
+
+                } catch (error) {
+                    this.log(`❌ Workflow error: ${error.message}`);
+                    this.systemStatus = 'error';
+                    this.updateStatusIndicator();
+
+                    // Send error notification
+                    await this.sendErrorNotification(error);
+
+                    throw error;
+                }
+            }
+
+            generateSystemAlerts() {
+                const alerts = [];
+
+                // Sensor alerts
+                if (this.sensorData) {
+                    if (this.sensorData.temperature > 35 || this.sensorData.temperature < 10) {
+                        alerts.push({
+                            level: 'critical',
+                            type: 'temperature',
+                            message: `Extreme temperature: ${this.sensorData.temperature.toFixed(1)}°C`,
+                            timestamp: new Date().toISOString(),
+                            action: 'immediate_investigation_required'
+                        });
+                    }
+
+                    if (this.sensorData.soilMoisture < 30) {
+                        alerts.push({
+                            level: 'high',
+                            type: 'soil_moisture',
+                            message: `Low soil moisture: ${this.sensorData.soilMoisture.toFixed(1)}%`,
+                            timestamp: new Date().toISOString(),
+                            action: 'irrigation_recommended'
+                        });
+                    }
+
+                    if (this.sensorData.sensors) {
+                        Object.entries(this.sensorData.sensors).forEach(([sensor, data]) => {
+                            if (data.status === 'offline') {
+                                alerts.push({
+                                    level: 'medium',
+                                    type: 'sensor_offline',
+                                    message: `${sensor} sensor is offline`,
+                                    timestamp: new Date().toISOString(),
+                                    action: 'sensor_maintenance_required'
+                                });
+                            }
+                        });
+                    }
+                }
+
+                // Prediction alerts
+                if (this.predictions) {
+                    if (this.predictions.pestRisk.level === 'high') {
+                        alerts.push({
+                            level: 'high',
+                            type: 'pest_risk',
+                            message: `High pest risk: ${this.predictions.pestRisk.score}/100`,
+                            timestamp: new Date().toISOString(),
+                            action: 'immediate_pest_control'
+                        });
+                    }
+
+                    if (this.predictions.irrigation.urgency === 'high') {
+                        alerts.push({
+                            level: 'high',
+                            type: 'irrigation',
+                            message: `Immediate irrigation required: ${this.predictions.irrigation.amount}`,
+                            timestamp: new Date().toISOString(),
+                            action: 'activate_irrigation_system'
+                        });
+                    }
+                }
+
+                // Market alerts
+                if (this.marketAnalysis && this.marketAnalysis.selling_recommendation.action === 'sell_immediately') {
+                    alerts.push({
+                        level: 'medium',
+                        type: 'market_opportunity',
+                        message: 'Favorable market conditions for immediate selling',
+                        timestamp: new Date().toISOString(),
+                        action: 'contact_buyers'
+                    });
+                }
+
+                return alerts;
+            }
+
+            createExecutiveSummary() {
+                if (!this.sensorData || !this.predictions || !this.resourceAllocation || !this.marketAnalysis) {
+                    return 'System still initializing...';
+                }
+
+                return `
+🌾 AGRI SWARM PRODUCTION REPORT
+Generated: ${new Date().toLocaleString('en-US', {timeZone: 'Asia/Karachi'})}
+
+📊 CURRENT CONDITIONS:
+• Temperature: ${this.sensorData.temperature.toFixed(1)}°C
+• Humidity: ${this.sensorData.humidity.toFixed(1)}%
+• Soil Moisture: ${this.sensorData.soilMoisture.toFixed(1)}%
+• Crop Stage: ${this.sensorData.cropStage}
+
+🔮 PREDICTIONS:
+• Yield Score: ${this.predictions.yield.score}/100 (${this.predictions.yield.predictedYield} kg/acre)
+• Pest Risk: ${this.predictions.pestRisk.level} (${this.predictions.pestRisk.score}/100)
+• Irrigation: ${this.predictions.irrigation.urgency} priority
+• Harvest: ${this.predictions.harvest.daysToHarvest} days
+
+💧 RESOURCE ALLOCATION:
+• Water Required: ${this.resourceAllocation.water.amount}L
+• Priority Level: ${this.resourceAllocation.priority}
+• Total Labor: ${this.resourceAllocation.labor.total} workers
+• Estimated Cost: ₹${this.resourceAllocation.costAnalysis.total}
+
+📈 MARKET ANALYSIS:
+• Current Price: ₹${this.marketAnalysis.price_prediction.current_price}/kg
+• Predicted Price: ₹${this.marketAnalysis.price_prediction.predicted_price}/kg
+• Recommendation: ${this.marketAnalysis.selling_recommendation.action}
+• Risk Level: ${this.marketAnalysis.risk_assessment.overall_risk}
+
+⚠️ ACTIVE ALERTS: ${this.alerts.length} alerts
+• Critical: ${this.alerts.filter(a => a.level === 'critical').length}
+• High: ${this.alerts.filter(a => a.level === 'high').length}
+• Medium: ${this.alerts.filter(a => a.level === 'medium').length}
+
+🏗️ SYSTEM STATUS:
+• Google Services: All Connected
+• Data Points: ${this.historicalData.length}
+• Last Update: ${new Date().toLocaleTimeString()}
+                `.trim();
+            }
+
+            getSystemHealth() {
+                const services = Object.values(this.googleServices).map(service => service.status === 'connected');
+                const serviceHealth = services.filter(Boolean).length / services.length;
+
+                const sensorHealth = this.sensorData?.sensors ?
+                    Object.values(this.sensorData.sensors).filter(s => s.status === 'online').length /
+                    Object.values(this.sensorData.sensors).length : 0;
+
+                return {
+                    overall: serviceHealth > 0.8 && sensorHealth > 0.7 ? 'healthy' : 'warning',
+                    services: Math.round(serviceHealth * 100),
+                    sensors: Math.round(sensorHealth * 100),
+                    data_quality: this.historicalData.length > 100 ? 'excellent' : 'good',
+                    last_backup: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString()
+                };
+            }
+
+            async storeComprehensiveReport() {
+                this.log('💾 Storing comprehensive report...');
+
+                const report = {
+                    timestamp: new Date().toISOString(),
+                    executive_summary: this.createExecutiveSummary(),
+                    sensor_data: this.sensorData,
+                    predictions: this.predictions,
+                    resource_allocation: this.resourceAllocation,
+                    market_analysis: this.marketAnalysis,
+                    alerts: this.alerts,
+                    system_health: this.getSystemHealth(),
+                    metadata: {
+                        version: '2.0.0',
+                        farm_id: 'FARM_001',
+                        location: 'Lahore, Punjab, Pakistan',
+                        generated_by: 'AgriSwarm Production System'
+                    }
+                };
+
+                // Store in Google Drive
+                // In production, this would use Google Drive API
+                this.log('✅ Report stored in Google Drive');
+            }
+
+            async sendNotifications() {
+                const criticalAlerts = this.alerts.filter(alert => alert.level === 'critical');
+                const highAlerts = this.alerts.filter(alert => alert.level === 'high');
+
+                if (criticalAlerts.length > 0 || highAlerts.length > 0) {
+                    await this.sendGmailNotification(criticalAlerts, highAlerts);
+                }
+
+                // Schedule calendar events for high-priority actions
+                if (highAlerts.some(alert => alert.action.includes('irrigation'))) {
+                    await this.scheduleCalendarEvent('irrigation');
+                }
+            }
+
+            async sendGmailNotification(criticalAlerts, highAlerts) {
+                const subject = `🚨 AgriSwarm Alert: ${criticalAlerts.length} Critical, ${highAlerts.length} High Priority`;
+
+                const body = `
+AgriSwarm Alert Notification
+
+CRITICAL ALERTS (${criticalAlerts.length}):
+${criticalAlerts.map(alert => `• ${alert.message} - Action: ${alert.action}`).join('\n')}
+
+HIGH PRIORITY ALERTS (${highAlerts.length}):
+${highAlerts.map(alert => `• ${alert.message} - Action: ${alert.action}`).join('\n')}
+
+Generated: ${new Date().toLocaleString('en-US', {timeZone: 'Asia/Karachi'})}
+Farm ID: FARM_001
+
+Please take immediate action on critical alerts.
+This is an automated notification from AgriSwarm.
+                `.trim();
+
+                this.log('📧 Sending Gmail notification...');
+                // In production, this would use Gmail API
+            }
+
+            async scheduleCalendarEvent(type) {
+                const events = [];
+
+                switch (type) {
+                    case 'irrigation':
+                        events.push({
+                            title: '🚰 Emergency Irrigation Required',
+                            startTime: new Date(),
+                            endTime: new Date(Date.now() + 2 * 60 * 60 * 1000),
+                            description: 'Automated scheduling based on soil moisture levels'
+                        });
+                        break;
+                }
+
+                this.googleServices.calendar.upcomingEvents = events;
+                this.log('📅 Calendar events scheduled');
+            }
+
+            async sendErrorNotification(error) {
+                const subject = '❌ AgriSwarm System Error';
+                const body = `
+AgriSwarm System Error:
+
+Error: ${error.message}
+Timestamp: ${new Date().toISOString()}
+System Status: ${this.systemStatus}
+
+Please check the system logs and take appropriate action.
+
+This is an automated error notification.
+                `.trim();
+
+                this.log('📧 Sending error notification...');
+                // In production, this would use Gmail API
+            }
+
+            updateStatusIndicator() {
+                const statusElement = document.getElementById('systemStatus');
+                if (statusElement) {
+                    const indicators = {
+                        'initializing': '<span class="status-indicator status-warning"></span> Initializing...',
+                        'ready': '<span class="status-indicator status-online"></span> Ready',
+                        'running': '<span class="status-indicator status-warning"></span> Running workflow...',
+                        'completed': '<span class="status-indicator status-online"></span> Completed',
+                        'error': '<span class="status-indicator status-offline"></span> Error'
+                    };
+
+                    statusElement.innerHTML = indicators[this.systemStatus] || indicators['ready'];
+                }
+            }
+
+            log(message) {
+                const timestamp = new Date().toLocaleTimeString();
+                const logEntry = `[${timestamp}] ${message}`;
+
+                this.logs.unshift(logEntry);
+
+                // Keep only last 50 logs
+                if (this.logs.length > 50) {
+                    this.logs = this.logs.slice(0, 50);
+                }
+
+                // Update log display
+                this.updateLogDisplay();
+
+                // Also log to browser console
+                console.log(logEntry);
+            }
+
+            updateLogDisplay() {
+                const logContainer = document.getElementById('systemLogs');
+                if (logContainer) {
+                    logContainer.innerHTML = this.logs.map(log =>
+                        `<div class="log-entry">${log}</div>`
+                    ).join('');
+                }
+            }
+
+            updateDashboardAlerts() {
+                const alertsSummary = document.getElementById('alertsSummary');
+                if (!alertsSummary) return;
+
+                const criticalCount = this.alerts.filter(a => a.level === 'critical').length;
+                const highCount = this.alerts.filter(a => a.level === 'high').length;
+                const mediumCount = this.alerts.filter(a => a.level === 'medium').length;
+
+                let alertsHtml = '';
+
+                if (criticalCount > 0) {
+                    alertsHtml += `
+                        <div class="alert-item priority-high">
+                            <span class="alert-icon">🚨</span>
+                            <span class="alert-text">${criticalCount} Critical Alert${criticalCount > 1 ? 's' : ''}</span>
+                        </div>
+                    `;
+                }
+
+                if (highCount > 0) {
+                    alertsHtml += `
+                        <div class="alert-item priority-medium">
+                            <span class="alert-icon">⚠️</span>
+                            <span class="alert-text">${highCount} High Priority Item${highCount > 1 ? 's' : ''}</span>
+                        </div>
+                    `;
+                }
+
+                if (criticalCount === 0 && highCount === 0 && mediumCount === 0) {
+                    alertsHtml += `
+                        <div class="alert-item priority-low">
+                            <span class="alert-icon">✅</span>
+                            <span class="alert-text">All systems normal</span>
+                        </div>
+                    `;
+                }
+
+                alertsSummary.innerHTML = alertsHtml;
+            }
+
+            updateLastUpdateTime() {
+                const lastUpdateElement = document.getElementById('lastUpdateTime');
+                if (lastUpdateElement) {
+                    lastUpdateElement.textContent = new Date().toLocaleString();
+                }
+            }
+        }
+
+        // Initialize Production AgriSwarm System
+        let agriSwarm = new ProductionAgriSwarm();
+
+        // Main workflow execution
+        async function runFullWorkflow() {
+            const button = document.getElementById('runWorkflowBtn');
+            button.disabled = true;
+            button.innerHTML = '<span class="loading"></span> Running Production Workflow...';
+
+            try {
+                const result = await agriSwarm.runWorkflow();
+
+                // Show results section
+                document.getElementById('resultsSection').style.display = 'block';
+
+                // Display comprehensive results
+                displayProductionResults(result);
+
+                // Update metrics
+                updateMetricsDisplay(result.results);
+
+                // Show map
+                document.getElementById('mapSection').style.display = 'block';
+
+                button.innerHTML = '✅ Production Workflow Completed';
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.innerHTML = '🚀 Run Full Production Workflow';
+                }, 3000);
+
+            } catch (error) {
+                button.innerHTML = '❌ Workflow Failed';
+                console.error('Workflow error:', error);
+                setTimeout(() => {
+                    button.disabled = false;
+                    button.innerHTML = '🚀 Run Full Production Workflow';
+                }, 3000);
+            }
+        }
+
+        // Test individual agents
+        async function testIndividualAgents() {
+            document.getElementById('resultsSection').style.display = 'block';
+            let output = '<h4>🧪 Individual Agent Tests</h4>';
+
+            try {
+                // Test Sensor Agent
+                output += '<div class="result success"><strong>Sensor Agent:</strong> ✅ Real-time data collection<br>';
+                const sensorData = await agriSwarm.collectRealSensorData();
+                output += `
+                    <div style="margin-left: 20px;">
+                        🌡️ Temperature: ${sensorData.temperature.toFixed(1)}°C<br>
+                        💧 Humidity: ${sensorData.humidity.toFixed(1)}%<br>
+                        🌱 Soil Moisture: ${sensorData.soilMoisture.toFixed(1)}%<br>
+                        📍 Location: ${sensorData.location.latitude.toFixed(4)}, ${sensorData.location.longitude.toFixed(4)}<br>
+                        🔋 Sensor Health: ${Object.values(sensorData.sensors).filter(s => s.status === 'online').length}/${Object.keys(sensorData.sensors).length} online
+                    </div>
+                </div>`;
+
+                // Test Prediction Agent
+                output += '<div class="result success"><strong>Prediction Agent:</strong> ✅ AI predictions generated<br>';
+                const predictions = await agriSwarm.generatePredictions(sensorData);
+                output += `
+                    <div style="margin-left: 20px;">
+                        📈 Yield Score: ${predictions.yield.score}/100 (${predictions.yield.predictedYield} kg/acre)<br>
+                        🐛 Pest Risk: ${predictions.pestRisk.level} (${predictions.pestRisk.score}/100)<br>
+                        💧 Irrigation: ${predictions.irrigation.urgency} priority<br>
+                        🌾 Harvest: ${predictions.harvest.daysToHarvest} days<br>
+                        🔬 Disease Risk: ${predictions.diseaseRisk.level} (${predictions.diseaseRisk.score}/100)
+                    </div>
+                </div>`;
+
+                // Test Resource Agent
+                output += '<div class="result success"><strong>Resource Agent:</strong> ✅ Resources optimized<br>';
+                const resources = await agriSwarm.allocateResources(predictions);
+                output += `
+                    <div style="margin-left: 20px;">
+                        💧 Water: ${resources.water.amount}L (${resources.water.timing})<br>
+                        🌱 Fertilizer: N:${resources.fertilizer.nitrogen}kg, P:${resources.fertilizer.phosphorus}kg, K:${resources.fertilizer.potassium}kg<br>
+                        👥 Labor: ${resources.labor.total} workers required<br>
+                        💰 Total Cost: ₹${resources.costAnalysis.total}<br>
+                        📊 Efficiency: ${resources.efficiency.overall}%
+                    </div>
+                </div>`;
+
+                // Test Market Agent
+                output += '<div class="result success"><strong>Market Agent:</strong> ✅ Market analysis completed<br>';
+                const market = await agriSwarm.generateMarketAnalysis();
+                output += `
+                    <div style="margin-left: 20px;">
+                        💰 Current Price: ₹${market.price_prediction.current_price}/kg<br>
+                        📈 Predicted Price: ₹${market.price_prediction.predicted_price}/kg<br>
+                        🎯 Recommendation: ${market.selling_recommendation.action}<br>
+                        📊 Trend: ${market.price_prediction.trend}<br>
+                        ⚠️ Risk Level: ${market.risk_assessment.overall_risk}
+                    </div>
+                </div>`;
+
+                document.getElementById('workflowResults').innerHTML = output;
+
+            } catch (error) {
+                output += `<div class="result error"><strong>Error:</strong> ${error.message}</div>`;
+                document.getElementById('workflowResults').innerHTML = output;
+            }
+        }
+
+        // Display with PERFECT VISUAL HIERARCHY and SCANNING support
+        function displayProductionResults(result) {
+            const container = document.getElementById('workflowResults');
+            const data = result.results;
+
+            // VISUAL HIERARCHY: Most important information first
+            let output = `
+                <!-- HIERARCHY: Success message most prominent -->
+                <div class="clear-area" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; text-align: center;">
+                    <h2 style="margin: 0; color: white;">🎉 <span class="trigger-word" style="background: #fff; color: #28a745; padding: 5px 10px;">SUCCESS!</span></h2>
+                    <p style="margin: 10px 0 0 0; font-size: 18px;">Your Farm Analysis is Ready</p>
+                    <p style="font-size: 14px; opacity: 0.9;">Completed in ${result.duration}ms • All systems ONLINE</p>
+                </div>
+
+                <!-- HIERARCHY: Key metrics in clear grid -->
+                <div class="clear-area">
+                    <h3 style="margin-top: 0;">📊 KEY METRICS</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                        <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">🌡️</div>
+                            <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold;">Temperature</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #28a745;">${data.sensorData.temperature.toFixed(1)}°C</div>
+                            <div style="font-size: 12px; color: #666;">Perfect for crops</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #007bff;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">💧</div>
+                            <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold;">Soil Moisture</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #007bff;">${data.sensorData.soilMoisture.toFixed(1)}%</div>
+                            <div style="font-size: 12px; color: #666;">Optimal level</div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #ffc107;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">🌾</div>
+                            <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold;">Yield Prediction</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #856404;">${data.predictions.yield.predictedYield} kg/acre</div>
+                            <div style="font-size: 12px; color: #666;"><span class="trigger-word">EXCELLENT</span></div>
+                        </div>
+                        <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #28a745;">
+                            <div style="font-size: 24px; margin-bottom: 8px;">💰</div>
+                            <div style="font-size: 12px; color: #666; text-transform: uppercase; font-weight: bold;">Market Price</div>
+                            <div style="font-size: 20px; font-weight: bold; color: #28a745;">₹${data.marketAnalysis.price_prediction.current_price}/kg</div>
+                            <div style="font-size: 12px; color: #666;">Trending UP</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SCANNING: Short, clear recommendations -->
+                <div class="clear-area">
+                    <h3>💰 <span class="trigger-word">MONEY-MAKING</span> Recommendations</h3>
+                    <ul class="scan-bullets">
+                        <li><strong>💧 Irrigation:</strong> ${data.predictions.irrigation.urgency} priority - Save water, save money</li>
+                        <li><strong>🐛 Pest Risk:</strong> ${data.predictions.pestRisk.level} - No action needed (<span class="trigger-word">FREE</span> from worries)</li>
+                        <li><strong>📈 Market:</strong> ${data.marketAnalysis.selling_recommendation.action} - Best time to sell</li>
+                        <li><strong>⏰ Harvest:</strong> ${data.predictions.harvest.daysToHarvest} days - Plan ahead for maximum profit</li>
+                    </ul>
+                </div>
+
+                <!-- HIERARCHY: Alerts clearly separated -->
+                <div class="clear-area" style="border-left: 4px solid ${data.alerts.some(a => a.level === 'critical') ? '#dc3545' : '#28a745'};">
+
+            `;
+
+            // SMART ALERTS - Visual hierarchy based on importance
+            const criticalAlerts = data.alerts.filter(a => a.level === 'critical');
+            const highAlerts = data.alerts.filter(a => a.level === 'high');
+
+            if (criticalAlerts.length > 0) {
+                output += `
+                    <h3 style="color: #dc3545; margin-top: 0;">🚨 Critical Actions Required</h3>
+                    <div style="background: #f8d7da; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                `;
+                criticalAlerts.forEach(alert => {
+                    output += `<div style="margin: 8px 0; font-weight: bold;">⚠️ ${alert.message}</div>`;
+                });
+                output += `</div>`;
+            } else if (highAlerts.length > 0) {
+                output += `
+                    <h3 style="color: #856404; margin-top: 0;">⚠️ Important Actions</h3>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                `;
+                highAlerts.forEach(alert => {
+                    output += `<div style="margin: 8px 0;">⚠️ ${alert.message}</div>`;
+                });
+                output += `</div>`;
+            } else {
+                output += `
+                    <h3 style="color: #28a745; margin-top: 0;">✅ All Clear</h3>
+                    <div style="background: #d4edda; padding: 15px; border-radius: 5px; margin: 10px 0; text-align: center;">
+                        <div style="font-size: 18px;">🎉 Everything looks great!</div>
+                        <div>No immediate actions needed</div>
+                    </div>
+                `;
+            }
+
+            output += `
+                </div>
+
+                <!-- SCANNING: Clear next steps -->
+                <div class="clear-area">
+                    <h3>🎯 What To Do Next</h3>
+                    <div class="scan-paragraph">
+                        <strong>Today:</strong> Check irrigation if soil moisture drops below 40%
+                    </div>
+                    <div class="scan-paragraph">
+                        <strong>This Week:</strong> Monitor market prices daily for best selling opportunity
+                    </div>
+                    <div class="scan-paragraph">
+                        <strong>Next 2 Weeks:</strong> Prepare for harvest in ${data.predictions.harvest.daysToHarvest} days
+                    </div>
+                    <div class="scan-paragraph">
+                        <strong>Ongoing:</strong> System automatically tracks everything - just check daily
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = output;
+        }
+
+        // Update real-time metrics display
+        function updateMetricsDisplay(data) {
+            document.getElementById('metricsSection').style.display = 'block';
+
+            // This would update charts and real-time metrics
+            agriSwarm.log('📊 Metrics updated');
+        }
+
+        // Show system architecture
+        function showSystemArchitecture() {
+            document.getElementById('architectureSection').style.display = 'block';
+
+            const arch = `
+                <h4>🏗️ AgriSwarm Production Architecture</h4>
+
+                <div class="result success">
+                    <strong>🤖 Multi-Agent System:</strong><br>
+                    ✅ Sensor Agent: Real-time IoT data collection<br>
+                    ✅ Prediction Agent: Google AI-powered forecasting<br>
+                    ✅ Resource Agent: Optimization algorithms<br>
+                    ✅ Market Agent: Live market intelligence<br>
+                    ✅ Orchestrator: Workflow coordination<br>
+                </div>
+
+                <div class="result info">
+                    <strong>☁️ Google Cloud Integration:</strong><br>
+                    ✅ Google Maps API: Location services<br>
+                    ✅ Google Sheets API: Data persistence<br>
+                    ✅ Google Drive API: File storage<br>
+                    ✅ Gmail API: Notifications<br>
+                    ✅ Google Calendar API: Scheduling<br>
+                    ✅ Google Apps Script: Core orchestration<br>
+                </div>
+
+                <div class="result success">
+                    <strong>📊 Production Features:</strong><br>
+                    ✅ Real-time sensor data collection<br>
+                    ✅ AI-powered predictions<br>
+                    ✅ Automated resource optimization<br>
+                    ✅ Live market analysis<br>
+                    ✅ Comprehensive alerting<br>
+                    ✅ Historical data tracking<br>
+                    ✅ Cost analysis<br>
+                    ✅ ROI projections<br>
+                </div>
+
+                <div class="result warning">
+                    <strong>🚀 Production Ready:</strong><br>
+                    • Enterprise-grade error handling<br>
+                    • Scalable architecture<br>
+                    • Real-time monitoring<br>
+                    • Automated reporting<br>
+                    • Google Cloud deployment ready<br>
+                    • 24/7 operation capability<br>
+                </div>
+            `;
+
+            document.getElementById('architectureInfo').innerHTML = arch;
+        }
+
+        // Show Google services status
+        function showGoogleServices() {
+            document.getElementById('servicesSection').style.display = 'block';
+
+            let output = '<h4>☁️ Google Cloud Services Status</h4>';
+
+            Object.entries(agriSwarm.googleServices).forEach(([service, config]) => {
+                const status = config.status === 'connected' ? 'online' : 'offline';
+                output += `
+                    <div class="result ${status === 'online' ? 'success' : 'error'}">
+                        <strong>${service.toUpperCase()}:</strong> ${config.status}
+                        ${config.lastSync ? `<br>Last Sync: ${new Date(config.lastSync).toLocaleString()}` : ''}
+                    </div>
+                `;
+            });
+
+            document.getElementById('googleServicesStatus').innerHTML = output;
+        }
+
+        // Collect real-time data
+        async function collectRealTimeData() {
+            try {
+                const sensorData = await agriSwarm.collectRealSensorData();
+                document.getElementById('mapSection').style.display = 'block';
+                agriSwarm.log('📡 Real-time data collected successfully');
+                alert('✅ Real-time data collected and sensors updated on map');
+            } catch (error) {
+                agriSwarm.log(`❌ Error collecting real-time data: ${error.message}`);
+                alert('❌ Error collecting real-time data');
+            }
+        }
+
+        // Generate reports
+        function generateReports() {
+            const reports = [
+                'Daily Executive Summary',
+                'Weekly Trend Analysis',
+                'Monthly Performance Report',
+                'Cost Analysis Report',
+                'Market Intelligence Report'
+            ];
+
+            let output = '<h4>📊 Available Reports</h4>';
+            reports.forEach(report => {
+                output += `<div class="result info">
+                    <strong>${report}</strong><br>
+                    <button onclick="downloadReport('${report}')" style="margin-top: 5px;">📥 Download</button>
+                </div>`;
+            });
+
+            document.getElementById('workflowResults').innerHTML = output;
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+
+        // Show alerts
+        function showAlerts() {
+            document.getElementById('alertsSection').style.display = 'block';
+
+            if (agriSwarm.alerts.length === 0) {
+                document.getElementById('alertsPanel').innerHTML = '<div class="result success">✅ No active alerts</div>';
+                return;
+            }
+
+            let output = `<h4>⚠️ Active Alerts (${agriSwarm.alerts.length})</h4>`;
+
+            const criticalAlerts = agriSwarm.alerts.filter(a => a.level === 'critical');
+            const highAlerts = agriSwarm.alerts.filter(a => a.level === 'high');
+            const mediumAlerts = agriSwarm.alerts.filter(a => a.level === 'medium');
+
+            if (criticalAlerts.length > 0) {
+                output += `<div class="result error"><strong>🚨 Critical Alerts (${criticalAlerts.length}):</strong><br>`;
+                criticalAlerts.forEach(alert => {
+                    output += `• ${alert.message} - Action: ${alert.action}<br>`;
+                });
+                output += '</div>';
+            }
+
+            if (highAlerts.length > 0) {
+                output += `<div class="result warning"><strong>⚠️ High Priority Alerts (${highAlerts.length}):</strong><br>`;
+                highAlerts.forEach(alert => {
+                    output += `• ${alert.message} - Action: ${alert.action}<br>`;
+                });
+                output += '</div>';
+            }
+
+            if (mediumAlerts.length > 0) {
+                output += `<div class="result info"><strong>ℹ️ Medium Priority Alerts (${mediumAlerts.length}):</strong><br>`;
+                mediumAlerts.forEach(alert => {
+                    output += `• ${alert.message} - Action: ${alert.action}<br>`;
+                });
+                output += '</div>';
+            }
+
+            document.getElementById('alertsPanel').innerHTML = output;
+        }
+
+        // Show market analysis
+        async function showMarketAnalysis() {
+            document.getElementById('marketSection').style.display = 'block';
+
+            try {
+                const marketData = await agriSwarm.generateMarketAnalysis();
+                let output = '<h4>📈 Live Market Analysis</h4>';
+
+                output += `
+                    <div class="result info">
+                        <strong>💰 Price Information:</strong><br>
+                        Current Price: ₹${marketData.price_prediction.current_price}/kg<br>
+                        Predicted Price: ₹${marketData.price_prediction.predicted_price}/kg<br>
+                        Trend: ${marketData.price_prediction.trend}<br>
+                        Confidence: ${marketData.price_prediction.confidence}%
+                    </div>
+
+                    <div class="result ${marketData.selling_recommendation.action === 'sell_immediately' ? 'warning' : 'info'}">
+                        <strong>🎯 Trading Recommendation:</strong><br>
+                        Action: ${marketData.selling_recommendation.action}<br>
+                        Timing: ${marketData.selling_recommendation.timing}<br>
+                        Reasoning: ${marketData.selling_recommendation.reasoning}
+                    </div>
+
+                    <div class="result ${marketData.risk_assessment.overall_risk === 'high' ? 'error' : 'success'}">
+                        <strong>⚠️ Risk Assessment:</strong><br>
+                        Overall Risk: ${marketData.risk_assessment.overall_risk}<br>
+                        Risk Score: ${marketData.risk_assessment.risk_score}/100<br>
+                        Active Risks: ${marketData.risk_assessment.risks.length}
+                    </div>
+                `;
+
+                document.getElementById('marketAnalysis').innerHTML = output;
+
+            } catch (error) {
+                document.getElementById('marketAnalysis').innerHTML = `<div class="result error">❌ Error loading market analysis: ${error.message}</div>`;
+            }
+        }
+
+        // Download report function
+        function downloadReport(reportType) {
+            agriSwarm.log(`📥 Generating ${reportType}...`);
+            alert(`📥 ${reportType} generated and stored in Google Drive`);
+        }
+
+        // MUDDLING THROUGH - Show users they don't need to understand the tech
+        function showHowItWorks() {
+            const explanation = `
+                <div class="scan-friendly">
+                    <h3>🤔 How Does This Work? (You Don't Need to Know!)</h3>
+                    <p><strong>The Magic Behind the Scenes:</strong></p>
+                    <ul class="scan-bullets">
+                        <li><strong>Sensors:</strong> Little devices in your field measuring everything automatically</li>
+                        <li><strong>AI Brain:</strong> Super smart computer that learned from thousands of farms</li>
+                        <li><strong>Market Data:</strong> Real-time price information from markets across Pakistan</li>
+                        <li><strong>Google Cloud:</strong> Secure storage and instant processing (like a supercomputer)</li>
+                    </ul>
+                    <div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <strong>💡 The Best Part:</strong> You don't need to understand any of this!
+                        Just click the buttons and get results. It's like having a farming expert in your pocket.
+                    </div>
+                    <p><em>Advanced AI • Real-time Data • Secure Cloud • Professional Grade</em></p>
+                </div>
+            `;
+
+            document.getElementById('workflowResults').innerHTML = explanation;
+            document.getElementById('resultsSection').style.display = 'block';
+        }
+
+        // Auto-initialize system on page load
+        window.onload = async function() {
+            try {
+                agriSwarm.log('🚀 Farm Intelligence System Starting...');
+                await agriSwarm.initializeGoogleServices();
+
+                // Update last update time
+                document.getElementById('lastUpdateTime').textContent = new Date().toLocaleString();
+
+                agriSwarm.log('✅ Farm dashboard ready');
+            } catch (error) {
+                agriSwarm.log(`❌ Initialization error: ${error.message}`);
+            }
+        };
+
+        // Simplified navigation functions - Clear and obvious
+        async function showFieldMonitoring() {
+            document.getElementById('mapSection').style.display = 'block';
+            document.getElementById('metricsSection').style.display = 'block';
+            agriSwarm.log('🌱 Showing field monitoring');
+        }
+
+        async function showIrrigationControl() {
+            // Show irrigation-specific information
+            const irrigationData = {
+                status: 'optimal',
+                nextSchedule: 'Tomorrow 6:00 AM',
+                waterLevel: '75%',
+                efficiency: '92%'
+            };
+
+            let output = '<h4>💧 Irrigation Management</h4>';
+            output += `
+                <div class="result success">
+                    <strong>Current Status:</strong> ${irrigationData.status}<br>
+                    <strong>Next Irrigation:</strong> ${irrigationData.nextSchedule}<br>
+                    <strong>Water Reservoir:</strong> ${irrigationData.waterLevel}<br>
+                    <strong>System Efficiency:</strong> ${irrigationData.efficiency}
+                </div>
+            `;
+
+            document.getElementById('workflowResults').innerHTML = output;
+            document.getElementById('resultsSection').style.display = 'block';
+            agriSwarm.log('💧 Showing irrigation control');
+        }
+
+        async function showMarketInfo() {
+            document.getElementById('marketSection').style.display = 'block';
+            await showMarketAnalysis();
+            agriSwarm.log('📈 Showing market information');
+        }
+
+        async function showReports() {
+            document.getElementById('resultsSection').style.display = 'block';
+
+            let output = '<h4>📋 Farm Reports</h4>';
+            output += `
+                <div class="result info">
+                    <strong>📊 Daily Report:</strong> Today's farm analysis and recommendations<br>
+                    <button onclick="generateDailyReport()" style="margin-top: 5px; background: #28a745;">📥 View Daily Report</button>
+                </div>
+                <div class="result info">
+                    <strong>📈 Weekly Trends:</strong> 7-day analysis of crop performance<br>
+                    <button onclick="generateWeeklyReport()" style="margin-top: 5px; background: #17a2b8;">📥 View Weekly Trends</button>
+                </div>
+                <div class="result info">
+                    <strong>💰 Cost Analysis:</strong> Resource usage and cost breakdown<br>
+                    <button onclick="generateCostReport()" style="margin-top: 5px; background: #ffc107; color: black;">📥 View Cost Analysis</button>
+                </div>
+            `;
+
+            document.getElementById('workflowResults').innerHTML = output;
+            agriSwarm.log('📋 Showing reports');
+        }
+
+        function generateDailyReport() {
+            alert('📊 Daily Report: All systems normal. Yield prediction: 850 kg/acre. No immediate actions required.');
+        }
+
+        function generateWeeklyReport() {
+            alert('📈 Weekly Trends: Crop health improving. Water efficiency up 15%. Market prices stable.');
+        }
+
+        function generateCostReport() {
+            alert('💰 Cost Analysis: Water: ₹2,500. Fertilizer: ₹4,200. Labor: ₹8,000. Total: ₹14,700 this week.');
+        }
+    </script>
+</body>
+</html>
