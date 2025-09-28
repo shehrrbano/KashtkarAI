@@ -1,7 +1,7 @@
 {
-  "name": "agriswarm-backend",
+  "name": "kashtkar-ai-backend",
   "version": "2.0.0",
-  "description": "AgriSwarm Backend Server - Node.js implementation of Google Apps Script functionality",
+  "description": "Kashtkar.ai Backend Server - AI-Powered Agricultural Intelligence Platform",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -16,13 +16,14 @@
     "node": ">=14.0.0"
   },
   "keywords": [
-    "agriswarm",
+    "kashtkar",
+    "kashtkar.ai",
     "agriculture",
     "ai",
     "farming",
     "backend",
     "api"
   ],
-  "author": "AgriSwarm Team",
+  "author": "Kashtkar.ai Team",
   "license": "MIT"
 }

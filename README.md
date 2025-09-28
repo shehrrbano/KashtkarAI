@@ -1,11 +1,11 @@
-# AgriSwarm - Autonomous Multi-Agent System for AgriTech Pakistan
+# Kashtkar.ai - AI-Powered Agricultural Intelligence Platform
 
 ## Overview
-AgriSwarm is an autonomous multi-agent swarm system designed for agricultural optimization in Pakistan. Using free Google services as an alternative to Vertex AI, this system enables intelligent crop optimization, precision irrigation, and advisory services through agent-to-agent collaboration.
+Kashtkar.ai is an intelligent agricultural platform designed for farmers in Pakistan. Using advanced AI and free Google services, this system enables intelligent crop optimization, precision farming, and comprehensive agricultural advisory services through multi-agent collaboration.
 
 ## Architecture
 - **Sensor Agent**: Monitors crop health and environmental data using Google Sheets
-- **Prediction Agent**: Forecasts crop yields and pest risks using Google Apps Script logic
+- **Prediction Agent**: Forecasts crop yields and pest risks using AI algorithms
 - **Resource Agent**: Manages water and resource allocation through automated workflows
 - **Market Agent**: Provides market recommendations and pricing information
 
@@ -14,42 +14,49 @@ AgriSwarm is an autonomous multi-agent swarm system designed for agricultural op
 - **Google Drive**: Data storage and file management
 - **Google Sheets**: Data processing and analysis
 - **Gmail**: Notifications and alerts
-- **Google Cloud Functions**: Optional serverless functions (free tier)
+- **Google AI Studio**: AI-powered location detection and analysis
+- **Google Maps**: Interactive mapping and location services
 
 ## Project Structure
 ```
-src/
-├── agents/          # Agent implementations
-│   ├── sensor.gs    # Environmental monitoring
-│   ├── prediction.gs # Yield forecasting
-│   ├── resource.gs  # Resource allocation
-│   └── market.gs    # Market intelligence
-├── storage/         # Data management
-├── utils/           # Helper functions
-tests/               # Test cases
-docs/                # Documentation
+kashtkar.ai/
+├── frontend.html          # Main dashboard
+├── login.html             # Authentication (Login)
+├── signup.html            # Authentication (Signup)
+├── backend/
+│   └── server.js          # Node.js backend server
+├── start_kashtkar.bat     # Windows startup script
+├── start_kashtkar.sh      # Linux/Mac startup script
+└── README.md              # This file
 ```
 
 ## Setup Instructions
 
-### 1. Google Cloud Project Setup
-Run the provided `project_setup.sh` script:
+### 1. Environment Setup
+1. **Install Node.js** (for backend server)
+2. **Install Python** (for frontend server)
+3. **Get API Keys**:
+   - Google Maps API key
+   - Google AI Studio API key
+
+### 2. Start the Application
 ```bash
-chmod +x project_setup.sh
-./project_setup.sh
+# On Windows
+start_kashtkar.bat
+
+# On Linux/Mac
+chmod +x start_kashtkar.sh
+./start_kashtkar.sh
 ```
 
-### 2. Google Apps Script Setup
-1. Go to [Google Apps Script](https://script.google.com)
-2. Create a new project
-3. Copy the contents of `appsscript.json` to your project settings
-4. Upload all `.gs` files from the `src/` directory
+### 3. Manual Start (Alternative)
+```bash
+# Terminal 1 - Start Backend (Port 8080)
+cd backend && npm start
 
-### 3. Google Drive Integration
-1. Create the following folders in Google Drive:
-   - `AgriSwarm-Data/`
-   - `AgriSwarm-Reports/`
-   - `AgriSwarm-Archive/`
+# Terminal 2 - Start Frontend (Port 8081)
+python -m http.server 8081
+```
 
 ### 4. Enable APIs
 Ensure these Google services are enabled in your project:
