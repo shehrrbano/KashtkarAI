@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kashtkar.ai - Sign In</title>
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;600;700&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    <!-- Google Material Icons -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #1a73e8;      /* Google Blue */
+            --primary-variant: #1557b0;    /* Darker Blue */
+            --secondary-color: #34a853;    /* Google Green */
+            --surface: #ffffff;            /* Pure White */
+            --surface-variant: #f8f9fa;    /* Light Gray */
+            --background: #f1f3f4;         /* Google Background */
+            --on-primary: #ffffff;         /* White text */
+            --on-surface: #202124;         /* Google Dark */
+            --on-surface-variant: #5f6368; /* Medium Gray */
+            --border: #dadce0;             /* Light Border */
+            --hover: #f8f9fa;              /* Hover State */
+            --shadow: rgba(60, 64, 67, 0.08); /* Google Shadow */
+            --shadow-hover: rgba(60, 64, 67, 0.15);
+            --error-color: #d93025;        /* Google Red */
+            --success-color: #34a853;      /* Google Green */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', 'Roboto', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f1f3f4;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        .auth-container {
+            display: flex;
+            width: 100vw;
+            min-height: 100vh;
+            background: var(--surface);
+        }
+
+        .left-panel {
+            flex: 1.2;
+            background: #0d1117;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 60px 40px;
+            position: relative;
+            overflow: hidden;
+            min-height: 100vh;
+        }
+
+        .left-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(26, 115, 232, 0.8) 0%, rgba(52, 168, 83, 0.6) 100%),
+                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23ffd89b"/><stop offset="100%" stop-color="%23195973"/></linearGradient><linearGradient id="fieldGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23ffd89b"/><stop offset="100%" stop-color="%23d4a574"/></linearGradient></defs><rect width="1200" height="400" fill="url(%23skyGrad)"/><rect y="400" width="1200" height="400" fill="url(%23fieldGrad)"/><g opacity="0.9"><rect x="100" y="450" width="1000" height="20" fill="%23d4a574" opacity="0.3"/><rect x="150" y="470" width="900" height="15" fill="%23c4a564" opacity="0.4"/><rect x="200" y="485" width="800" height="12" fill="%23b4a554" opacity="0.5"/></g><g opacity="0.7"><rect x="300" y="350" width="8" height="80" fill="%23654321"/><rect x="320" y="340" width="12" height="90" fill="%23654321"/><rect x="340" y="360" width="6" height="70" fill="%23654321"/><rect x="360" y="345" width="10" height="85" fill="%23654321"/><rect x="380" y="355" width="7" height="75" fill="%23654321"/></g><circle cx="600" cy="200" r="80" fill="%23ffd700" opacity="0.8"/><g transform="translate(550,150)"><path d="M0,40 Q20,10 40,40 Q60,10 80,40 Q60,70 40,40 Q20,70 0,40" fill="%23ffffe0" opacity="0.9"/><animateTransform attributeName="transform" type="rotate" values="0 40 40;360 40 40" dur="20s" repeatCount="indefinite"/></g></svg>') center/cover;
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            text-align: left;
+            color: white;
+            position: relative;
+            z-index: 2;
+            max-width: 400px;
+        }
+
+        .hero-title {
+            font-size: 48px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-bottom: 24px;
+            line-height: 1.4;
+        }
+
+        .hero-link {
+            color: #58a6ff;
+            text-decoration: none;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .hero-link:hover {
+            text-decoration: underline;
+        }
+
+        .feature-list {
+            text-align: left;
+            max-width: 350px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            font-size: 16px;
+        }
+
+        .feature-icon {
+            width: 24px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .right-panel {
+            flex: 0.8;
+            padding: 60px 48px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: var(--surface);
+            min-height: 100vh;
+        }
+
+        .auth-header {
+            margin-bottom: 32px;
+        }
+
+        .auth-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--on-surface);
+            margin-bottom: 8px;
+        }
+
+        .auth-subtitle {
+            font-size: 14px;
+            color: var(--on-surface-variant);
+        }
+
+        .signin-link {
+            position: absolute;
+            top: 24px;
+            right: 48px;
+            font-size: 14px;
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .signin-link:hover {
+            text-decoration: underline;
+        }
+
+
+        .form-section {
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-label {
+            display: block;
+            font-size: 14px;
+            color: var(--on-surface);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            background: var(--surface);
+            color: var(--on-surface);
+            transition: all 0.2s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.1);
+        }
+
+        .input-field::placeholder {
+            color: var(--on-surface-variant);
+        }
+
+        .form-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .primary-button {
+            background: var(--primary-color);
+            color: var(--on-primary);
+            border: none;
+            padding: 16px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .primary-button:hover {
+            background: var(--primary-variant);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(26, 115, 232, 0.3);
+        }
+
+        .primary-button:disabled {
+            background: var(--on-surface-variant);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .secondary-button {
+            background: var(--surface);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .secondary-button:hover {
+            background: var(--primary-color);
+            color: var(--on-primary);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 24px 0;
+            position: relative;
+            color: var(--on-surface-variant);
+            font-size: 14px;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .divider span {
+            background: var(--surface);
+            padding: 0 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .google-signin-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 12px 24px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--on-surface);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            margin-bottom: 16px;
+        }
+
+        .google-signin-button:hover {
+            background: var(--hover);
+            border-color: var(--on-surface-variant);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .google-logo {
+            width: 20px;
+            height: 20px;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="%234285f4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="%2334a853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="%23fbbc04" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="%23ea4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>') center/contain no-repeat;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .footer-links {
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        .footer-link {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 14px;
+            margin: 0 8px;
+        }
+
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fce8e6;
+            color: var(--error-color);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--error-color);
+            display: none;
+        }
+
+        .success-message {
+            background: #e6f4ea;
+            color: var(--success-color);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--success-color);
+            display: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 32px 24px 24px;
+                margin: 16px;
+                border-radius: 16px;
+            }
+
+            .app-logo {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+
+            .app-title {
+                font-size: 24px;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-container">
+        <!-- Left Panel - Hero Section -->
+        <div class="left-panel">
+            <div class="hero-content">
+                <h1 class="hero-title">Create your free account</h1>
+                <p class="hero-subtitle">Explore Kashtkar.ai's core features for individuals and organizations.</p>
+                <a href="#" class="hero-link">
+                    See what's included
+                    <span class="material-icons" style="font-size: 16px;">arrow_forward</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Right Panel - Authentication Form -->
+        <div class="right-panel">
+            <a href="signup.html" class="signin-link">Don't have an account? Create Account →</a>
+
+            <div class="auth-header">
+                <h2 class="auth-title">Sign up for Kashtkar.ai</h2>
+            </div>
+
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-message"></div>
+
+            <button class="google-signin-button" onclick="handleGoogleSignIn()" style="margin-bottom: 24px;">
+                <div class="google-logo">G</div>
+                Continue with Google
+            </button>
+
+            <div class="divider">
+                <span>or</span>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-section">
+                    <div class="input-group">
+                        <label class="input-label">Username or Email</label>
+                        <input type="text" id="usernameOrEmail" class="input-field" placeholder="Username or Email" required>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">Password</label>
+                        <input type="password" id="password" class="input-field" placeholder="Password" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="primary-button" id="loginBtn">
+                        Sign In
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Google Sign-In Script -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script>
+        // Authentication state
+        let authState = {
+            isAuthenticated: false,
+            user: null,
+            token: null
+        };
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Handle username or email login
+        async function handleLogin(event) {
+            event.preventDefault();
+
+            const usernameOrEmail = document.getElementById('usernameOrEmail').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+
+            if (!usernameOrEmail || !password) {
+                showError('Please fill in all fields');
+                return;
+            }
+
+            // Show loading state
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<div class="loading"></div> Signing In...';
+            loginBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        usernameOrEmail: usernameOrEmail,
+                        password: password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authState.isAuthenticated = true;
+                    authState.user = data.user;
+                    authState.token = data.token;
+
+                    showSuccess('Login successful! Redirecting...');
+
+                    // Store token in localStorage
+                    localStorage.setItem('kashtkar_token', data.token);
+                    localStorage.setItem('kashtkar_user', JSON.stringify(data.user));
+
+                    // Redirect to main app after delay
+                    setTimeout(() => {
+                        window.location.href = 'frontend.html';
+                    }, 1500);
+                } else {
+                    showError(data.error || 'Login failed');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('Network error. Please try again.');
+            } finally {
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+            }
+        }
+
+        // Handle Demo Login (Easy bypass for demonstrations)
+        async function handleDemoLogin() {
+            const loginBtn = document.getElementById('loginBtn');
+
+            // Show loading state
+            const originalText = loginBtn.innerHTML;
+            loginBtn.innerHTML = '<div class="loading"></div> Starting Demo...';
+            loginBtn.disabled = true;
+
+            try {
+                const response = await fetch('/api/auth/demo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSuccess('Demo login successful! Redirecting...');
+
+                    // Store demo token in localStorage
+                    localStorage.setItem('kashtkar_token', data.token);
+                    localStorage.setItem('kashtkar_user', JSON.stringify(data.user));
+
+                    // Redirect to main app after delay
+                    setTimeout(() => {
+                        window.location.href = 'frontend.html';
+                    }, 1500);
+                } else {
+                    showError(data.error || 'Demo login failed');
+                }
+            } catch (error) {
+                console.error('Demo login error:', error);
+                showError('Demo login failed. Please try again.');
+            } finally {
+                loginBtn.innerHTML = originalText;
+                loginBtn.disabled = false;
+            }
+        }
+
+        // Handle Google Sign-In
+        async function handleGoogleSignIn() {
+            try {
+                // Initialize Google Sign-In
+                if (typeof google !== 'undefined' && google.accounts) {
+                    google.accounts.id.initialize({
+                        client_id: 'YOUR_GOOGLE_CLIENT_ID', // Replace with actual client ID
+                        callback: handleGoogleCredentialResponse
+                    });
+
+                    google.accounts.id.prompt();
+                } else {
+                    showError('Google Sign-In not available');
+                }
+            } catch (error) {
+                console.error('Google Sign-In error:', error);
+                showError('Google Sign-In failed');
+            }
+        }
+
+        // Handle Google credential response
+        async function handleGoogleCredentialResponse(response) {
+            try {
+                const token = response.credential;
+
+                const apiResponse = await fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        token: token
+                    })
+                });
+
+                const data = await apiResponse.json();
+
+                if (apiResponse.ok) {
+                    authState.isAuthenticated = true;
+                    authState.user = data.user;
+                    authState.token = data.token;
+
+                    showSuccess('Google Sign-In successful! Redirecting...');
+
+                    // Store token in localStorage
+                    localStorage.setItem('kashtkar_token', data.token);
+                    localStorage.setItem('kashtkar_user', JSON.stringify(data.user));
+
+                    // Redirect to main app
+                    setTimeout(() => {
+                        window.location.href = 'frontend.html';
+                    }, 1500);
+                } else {
+                    showError(data.error || 'Google Sign-In failed');
+                }
+            } catch (error) {
+                console.error('Google auth error:', error);
+                showError('Google Sign-In failed');
+            }
+        }
+
+        // Show signup form
+        function showSignup() {
+            // For now, just show a message
+            showError('Signup functionality coming soon!');
+        }
+
+        // Check if user is already authenticated
+        function checkAuthStatus() {
+            const token = localStorage.getItem('kashtkar_token');
+            const user = localStorage.getItem('kashtkar_user');
+
+            if (token && user) {
+                try {
+                    authState.isAuthenticated = true;
+                    authState.user = JSON.parse(user);
+                    authState.token = token;
+
+                    // Redirect to main app if already logged in
+                    window.location.href = 'frontend.html';
+                } catch (error) {
+                    console.error('Auth status check failed:', error);
+                    localStorage.removeItem('kashtkar_token');
+                    localStorage.removeItem('kashtkar_user');
+                }
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+
+            // Focus on email field
+            const emailField = document.getElementById('email');
+            if (emailField) {
+                emailField.focus();
+            }
+        });
+    </script>
+</body>
+</html>

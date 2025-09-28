@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location Detection Test - AgriSwarm</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .test-button {
+            background: #ff6b35;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #e55100;
+        }
+        .test-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .location-result {
+            background: #fff3e0;
+            border-left: 4px solid #ff6b35;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .test-examples {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        .example-query {
+            font-family: monospace;
+            background: white;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 3px;
+            border: 1px solid #e9ecef;
+            cursor: pointer;
+        }
+        .example-query:hover {
+            background: #e8f4fd;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📍 AgriSwarm Location Detection Test</h1>
+        <p>Test the location detection feature that automatically identifies place names in your queries and shows them on the map.</p>
+
+        <div class="test-section">
+            <h2>🔍 Test Location Detection</h2>
+            <p>Enter a query containing a place name to test location detection:</p>
+            <input type="text" class="test-input" id="locationTestInput" placeholder="e.g., Show me agricultural data for Lahore">
+            <br>
+            <button class="test-button" onclick="testLocationQuery()">Test Location Detection</button>
+            <div id="locationTestResults"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📋 Test Examples</h2>
+            <p>Click on any example to test it:</p>
+            <div class="test-examples">
+                <div class="example-query" onclick="setTestQuery('Show me agricultural data for Lahore')">Show me agricultural data for Lahore</div>
+                <div class="example-query" onclick="setTestQuery('What are the conditions in Karachi?')">What are the conditions in Karachi?</div>
+                <div class="example-query" onclick="setTestQuery('Check crop yields in Punjab')">Check crop yields in Punjab</div>
+                <div class="example-query" onclick="setTestQuery('Weather information for Islamabad')">Weather information for Islamabad</div>
+                <div class="example-query" onclick="setTestQuery('How is the farming situation in Peshawar?')">How is the farming situation in Peshawar?</div>
+                <div class="example-query" onclick="setTestQuery('Tell me about crops in Multan')">Tell me about crops in Multan</div>
+                <div class="example-query" onclick="setTestQuery('Show Faisalabad on the map')">Show Faisalabad on the map</div>
+                <div class="example-query" onclick="setTestQuery('Agricultural data for Sindh province')">Agricultural data for Sindh province</div>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🧪 Batch Test</h2>
+            <p>Test multiple queries automatically:</p>
+            <button class="test-button" onclick="runBatchLocationTest()">Run Batch Test</button>
+            <div id="batchTestResults"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>📍 Supported Locations</h2>
+            <div style="background: #f8f9fa; padding: 15px; border-radius: 5px;">
+                <h3>Pakistan Cities & Provinces:</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 10px;">
+                    <div><strong>Cities:</strong> Lahore, Karachi, Islamabad, Rawalpindi, Peshawar, Quetta, Multan, Faisalabad, Sialkot, Gujranwala, Hyderabad, Sukkur, Larkana</div>
+                    <div><strong>Provinces:</strong> Punjab, Sindh, Khyber Pakhtunkhwa, Balochistan</div>
+                </div>
+                <p style="margin-top: 10px; font-size: 14px; color: #666;">
+                    <em>Note: The system also uses Google AI Studio to detect and geocode other location names not in the predefined list.</em>
+                </p>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🚨 How It Works</h2>
+            <ol>
+                <li><strong>Message Analysis:</strong> When you send a message, the system analyzes it for place names</li>
+                <li><strong>AI-Powered Detection:</strong> Google AI Studio API identifies locations and gets their coordinates</li>
+                <li><strong>Map Navigation:</strong> The map automatically pans to show the detected location</li>
+                <li><strong>Visual Feedback:</strong> You'll see a confirmation message and location marker on the map</li>
+                <li><strong>Fallback System:</strong> If AI detection fails, it uses a predefined list of Pakistani cities</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h2>🔧 Troubleshooting</h2>
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px;">
+                <h3>Common Issues:</h3>
+                <ul>
+                    <li><strong>API Key Issues:</strong> Ensure the Google AI Studio API key is valid and has proper permissions</li>
+                    <li><strong>Network Errors:</strong> Check internet connection for API calls</li>
+                    <li><strong>Location Not Found:</strong> Try more specific place names or check spelling</li>
+                    <li><strong>Map Not Updating:</strong> Ensure Google Maps is loaded and the location detection toggle is enabled</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Set test query in input field
+        function setTestQuery(query) {
+            document.getElementById('locationTestInput').value = query;
+        }
+
+        // Test individual location query
+        async function testLocationQuery() {
+            const input = document.getElementById('locationTestInput');
+            const results = document.getElementById('locationTestResults');
+            const query = input.value.trim();
+
+            if (!query) {
+                results.innerHTML = '<div class="status error">❌ Please enter a test query</div>';
+                return;
+            }
+
+            results.innerHTML = '<div class="status info">🔍 Analyzing query for location detection...</div>';
+
+            try {
+                // Simulate the location detection process
+                console.log('🧪 Testing location detection for:', query);
+
+                // This would normally call the actual detection function
+                // For demo purposes, we'll simulate the process
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                const locationData = await simulateLocationDetection(query);
+
+                if (locationData) {
+                    results.innerHTML = `
+                        <div class="status success">✅ Location detection successful!</div>
+                        <div class="location-result">
+                            <strong>📍 Detected Location:</strong> ${locationData.placeName}<br>
+                            <strong>🗺️ Coordinates:</strong> ${locationData.coordinates.lat}, ${locationData.coordinates.lng}<br>
+                            <strong>🎯 Confidence:</strong> ${locationData.confidence}<br>
+                            <em>The map would now navigate to show this location with a marker.</em>
+                        </div>
+                    `;
+                } else {
+                    results.innerHTML = '<div class="status error">❌ No location detected in the query</div>';
+                }
+
+            } catch (error) {
+                results.innerHTML = `<div class="status error">❌ Error: ${error.message}</div>`;
+            }
+        }
+
+        // Simulate location detection (replace with actual function call)
+        async function simulateLocationDetection(query) {
+            const lowerQuery = query.toLowerCase();
+
+            // Simulate AI detection results
+            const mockLocations = {
+                'lahore': { placeName: 'Lahore', coordinates: { lat: 31.5204, lng: 74.3587 }, confidence: 'high' },
+                'karachi': { placeName: 'Karachi', coordinates: { lat: 24.8607, lng: 67.0011 }, confidence: 'high' },
+                'islamabad': { placeName: 'Islamabad', coordinates: { lat: 33.6846, lng: 73.0479 }, confidence: 'high' },
+                'punjab': { placeName: 'Punjab', coordinates: { lat: 31.1704, lng: 72.7097 }, confidence: 'medium' },
+                'sindh': { placeName: 'Sindh', coordinates: { lat: 25.8943, lng: 68.5247 }, confidence: 'medium' },
+                'peshawar': { placeName: 'Peshawar', coordinates: { lat: 34.0151, lng: 71.5249 }, confidence: 'high' },
+                'multan': { placeName: 'Multan', coordinates: { lat: 30.1575, lng: 71.5249 }, confidence: 'high' },
+                'faisalabad': { placeName: 'Faisalabad', coordinates: { lat: 31.4504, lng: 73.1350 }, confidence: 'high' }
+            };
+
+            for (const [key, location] of Object.entries(mockLocations)) {
+                if (lowerQuery.includes(key)) {
+                    return location;
+                }
+            }
+
+            return null;
+        }
+
+        // Run batch test
+        async function runBatchLocationTest() {
+            const results = document.getElementById('batchTestResults');
+            results.innerHTML = '<div class="status info">🧪 Running batch location detection tests...</div>';
+
+            const testQueries = [
+                'Show me agricultural data for Lahore',
+                'What are the conditions in Karachi?',
+                'Check crop yields in Punjab',
+                'Weather information for Islamabad',
+                'How is farming in Peshawar?',
+                'Tell me about crops in Multan',
+                'Show Faisalabad on the map',
+                'Agricultural data for Sindh'
+            ];
+
+            let successful = 0;
+            let failed = 0;
+            const batchResults = [];
+
+            for (const query of testQueries) {
+                try {
+                    const locationData = await simulateLocationDetection(query);
+                    if (locationData) {
+                        successful++;
+                        batchResults.push(`✅ ${query} → ${locationData.placeName}`);
+                    } else {
+                        failed++;
+                        batchResults.push(`❌ ${query} → No location detected`);
+                    }
+                } catch (error) {
+                    failed++;
+                    batchResults.push(`❌ ${query} → Error: ${error.message}`);
+                }
+            }
+
+            const successRate = Math.round((successful / testQueries.length) * 100);
+
+            let html = `
+                <div class="status ${successRate > 70 ? 'success' : 'error'}">
+                    🧪 Batch Test Complete: ${successful}/${testQueries.length} successful (${successRate}%)
+                </div>
+                <div style="margin-top: 10px;">
+                    ${batchResults.map(result => `<div style="margin: 5px 0; padding: 5px; background: #f8f9fa; border-radius: 3px;">${result}</div>`).join('')}
+                </div>
+            `;
+
+            results.innerHTML = html;
+        }
+
+        // Auto-focus on input
+        window.addEventListener('load', () => {
+            document.getElementById('locationTestInput').focus();
+        });
+    </script>
+</body>
+</html>

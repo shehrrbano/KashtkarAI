@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map Navigation Debug - AgriSwarm</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .debug-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .debug-button {
+            background: #2196f3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .debug-button:hover {
+            background: #1976d2;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .coordinates-input {
+            display: flex;
+            gap: 10px;
+            margin: 10px 0;
+            align-items: center;
+        }
+        .coordinates-input input {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 120px;
+        }
+        .map-container {
+            width: 100%;
+            height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .debug-output {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🗺️ Map Navigation Debug Tool</h1>
+        <p>This tool helps debug map navigation issues in AgriSwarm. Use the controls below to test different aspects of map functionality.</p>
+
+        <div class="debug-section">
+            <h2>🔍 System Status Check</h2>
+            <button class="debug-button" onclick="checkSystemStatus()">Check System Status</button>
+            <div id="systemStatusResults"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>🗺️ Map Status Check</h2>
+            <button class="debug-button" onclick="checkMapStatus()">Check Map Status</button>
+            <div id="mapStatusResults"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>📍 Manual Navigation Test</h2>
+            <p>Enter coordinates to test manual map navigation:</p>
+            <div class="coordinates-input">
+                <label>Latitude:</label>
+                <input type="number" id="testLat" step="any" value="31.5204">
+                <label>Longitude:</label>
+                <input type="number" id="testLng" step="any" value="74.3587">
+                <label>Place Name:</label>
+                <input type="text" id="testPlaceName" value="Lahore">
+            </div>
+            <button class="debug-button" onclick="testManualNavigation()">Navigate to Coordinates</button>
+            <div id="manualNavigationResults"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>🏙️ Preset Location Tests</h2>
+            <p>Test navigation to common Pakistani cities:</p>
+            <button class="debug-button" onclick="navigateToLahore()">Lahore</button>
+            <button class="debug-button" onclick="navigateToKarachi()">Karachi</button>
+            <button class="debug-button" onclick="navigateToIslamabad()">Islamabad</button>
+            <button class="debug-button" onclick="navigateToMultan()">Multan</button>
+            <div id="presetNavigationResults"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>🔄 Batch Navigation Test</h2>
+            <p>Test navigation to multiple locations automatically:</p>
+            <button class="debug-button" onclick="runBatchNavigationTest()">Run Batch Test</button>
+            <div id="batchNavigationResults"></div>
+        </div>
+
+        <div class="debug-section">
+            <h2>📊 Debug Output</h2>
+            <div id="debugOutput" class="debug-output">Debug messages will appear here...</div>
+            <button class="debug-button" onclick="clearDebugOutput()">Clear Output</button>
+        </div>
+
+        <div class="debug-section">
+            <h2>🚨 Common Issues & Solutions</h2>
+            <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 15px; border-radius: 5px;">
+                <h3>Map Not Moving:</h3>
+                <ul>
+                    <li><strong>Check if Google Maps API is loaded</strong> - Open browser console and check for API errors</li>
+                    <li><strong>Verify coordinates are valid</strong> - Ensure lat/lng values are numbers within valid ranges</li>
+                    <li><strong>Check map initialization</strong> - Make sure the map is fully loaded before navigation</li>
+                    <li><strong>Try manual navigation test</strong> - Use the manual test above to isolate the issue</li>
+                </ul>
+
+                <h3>Debug Commands (use in browser console):</h3>
+                <ul>
+                    <li><code>debugMapStatus()</code> - Check current map status</li>
+                    <li><code>debugMapNavigation(31.5204, 74.3587, 'Lahore')</code> - Test navigation to specific coordinates</li>
+                    <li><code>testMapNavigation()</code> - Run automated navigation tests</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Google Maps API -->
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCL2tcGwvncOE07j2tcibAzMxUpaQBRsi0&libraries=places&callback=initializeGoogleMapsCallback"></script>
+
+    <script>
+        let map = null;
+        let debugMessages = [];
+
+        // Initialize Google Maps
+        function initializeGoogleMapsCallback() {
+            console.log('🗺️ Google Maps API loaded');
+            initializeMap();
+        }
+
+        function initializeMap() {
+            try {
+                const mapOptions = {
+                    center: { lat: 31.5204, lng: 74.3587 }, // Default to Lahore
+                    zoom: 8,
+                    styles: [{
+                        featureType: 'all',
+                        elementType: 'geometry',
+                        stylers: [{ color: '#f5f5f5' }]
+                    }],
+                    mapTypeControl: false,
+                    streetViewControl: false,
+                    fullscreenControl: false
+                };
+
+                map = new google.maps.Map(document.createElement('div'), mapOptions);
+                console.log('✅ Map initialized successfully');
+            } catch (error) {
+                console.error('❌ Map initialization failed:', error);
+            }
+        }
+
+        // Debug logging function
+        function logDebug(message) {
+            debugMessages.push(`[${new Date().toLocaleTimeString()}] ${message}`);
+            const debugOutput = document.getElementById('debugOutput');
+            debugOutput.innerHTML = debugMessages.slice(-20).join('<br>'); // Keep last 20 messages
+            console.log(`🔧 Debug: ${message}`);
+        }
+
+        // Check system status
+        function checkSystemStatus() {
+            const results = document.getElementById('systemStatusResults');
+            logDebug('Checking system status...');
+
+            const status = {
+                googleMapsLoaded: !!(window.google && window.google.maps),
+                mapExists: !!map,
+                apiKeyConfigured: true,
+                browserSupport: 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window
+            };
+
+            let html = '<div class="status info">';
+            html += '<strong>System Status:</strong><br>';
+            html += `Google Maps API: ${status.googleMapsLoaded ? '✅ Loaded' : '❌ Not Loaded'}<br>`;
+            html += `Map Instance: ${status.mapExists ? '✅ Created' : '❌ Not Created'}<br>`;
+            html += `API Key: ${status.apiKeyConfigured ? '✅ Configured' : '❌ Missing'}<br>`;
+            html += `Speech Recognition: ${status.browserSupport ? '✅ Supported' : '❌ Not Supported'}<br>`;
+            html += '</div>';
+
+            results.innerHTML = html;
+            logDebug(`System check complete: ${JSON.stringify(status)}`);
+        }
+
+        // Check map status
+        function checkMapStatus() {
+            const results = document.getElementById('mapStatusResults');
+            logDebug('Checking map status...');
+
+            if (!map) {
+                results.innerHTML = '<div class="status error">❌ Map not initialized</div>';
+                return;
+            }
+
+            const status = {
+                center: map.getCenter(),
+                zoom: map.getZoom(),
+                bounds: map.getBounds(),
+                mapType: map.getMapTypeId()
+            };
+
+            let html = '<div class="status success">';
+            html += '<strong>Map Status:</strong><br>';
+            html += `Center: ${status.center.lat().toFixed(4)}, ${status.center.lng().toFixed(4)}<br>`;
+            html += `Zoom Level: ${status.zoom}<br>`;
+            html += `Map Type: ${status.mapType}<br>`;
+            html += '</div>';
+
+            results.innerHTML = html;
+            logDebug(`Map status: center=${status.center.lat().toFixed(4)},${status.center.lng().toFixed(4)} zoom=${status.zoom}`);
+        }
+
+        // Test manual navigation
+        function testManualNavigation() {
+            const lat = parseFloat(document.getElementById('testLat').value);
+            const lng = parseFloat(document.getElementById('testLng').value);
+            const placeName = document.getElementById('testPlaceName').value;
+
+            const results = document.getElementById('manualNavigationResults');
+            logDebug(`Testing manual navigation to: ${lat}, ${lng} (${placeName})`);
+
+            if (isNaN(lat) || isNaN(lng)) {
+                results.innerHTML = '<div class="status error">❌ Invalid coordinates entered</div>';
+                return;
+            }
+
+            if (!map) {
+                results.innerHTML = '<div class="status error">❌ Map not initialized</div>';
+                return;
+            }
+
+            try {
+                const newPosition = new google.maps.LatLng(lat, lng);
+
+                // Remove existing marker
+                if (window.debugMarker) {
+                    window.debugMarker.setMap(null);
+                }
+
+                // Add new marker
+                window.debugMarker = new google.maps.Marker({
+                    position: newPosition,
+                    map: map,
+                    title: placeName,
+                    animation: google.maps.Animation.DROP
+                });
+
+                // Pan to location
+                map.panTo(newPosition);
+                map.setZoom(12);
+
+                results.innerHTML = `<div class="status success">✅ Successfully navigated to ${placeName} (${lat.toFixed(4)}, ${lng.toFixed(4)})</div>`;
+                logDebug(`Manual navigation successful: ${placeName} at ${lat},${lng}`);
+
+            } catch (error) {
+                results.innerHTML = `<div class="status error">❌ Navigation failed: ${error.message}</div>`;
+                logDebug(`Manual navigation failed: ${error.message}`);
+            }
+        }
+
+        // Preset location tests
+        function navigateToLahore() {
+            document.getElementById('testLat').value = '31.5204';
+            document.getElementById('testLng').value = '74.3587';
+            document.getElementById('testPlaceName').value = 'Lahore';
+            testManualNavigation();
+        }
+
+        function navigateToKarachi() {
+            document.getElementById('testLat').value = '24.8607';
+            document.getElementById('testLng').value = '67.0011';
+            document.getElementById('testPlaceName').value = 'Karachi';
+            testManualNavigation();
+        }
+
+        function navigateToIslamabad() {
+            document.getElementById('testLat').value = '33.6846';
+            document.getElementById('testLng').value = '73.0479';
+            document.getElementById('testPlaceName').value = 'Islamabad';
+            testManualNavigation();
+        }
+
+        function navigateToMultan() {
+            document.getElementById('testLat').value = '30.1575';
+            document.getElementById('testLng').value = '71.5249';
+            document.getElementById('testPlaceName').value = 'Multan';
+            testManualNavigation();
+        }
+
+        // Batch navigation test
+        async function runBatchNavigationTest() {
+            const results = document.getElementById('batchNavigationResults');
+            logDebug('Starting batch navigation test...');
+
+            const testLocations = [
+                { name: 'Lahore', lat: 31.5204, lng: 74.3587 },
+                { name: 'Karachi', lat: 24.8607, lng: 67.0011 },
+                { name: 'Islamabad', lat: 33.6846, lng: 73.0479 },
+                { name: 'Multan', lat: 30.1575, lng: 71.5249 }
+            ];
+
+            let successful = 0;
+            let failed = 0;
+            const batchResults = [];
+
+            for (const location of testLocations) {
+                try {
+                    logDebug(`Testing navigation to: ${location.name}`);
+
+                    const newPosition = new google.maps.LatLng(location.lat, location.lng);
+
+                    if (window.debugMarker) {
+                        window.debugMarker.setMap(null);
+                    }
+
+                    window.debugMarker = new google.maps.Marker({
+                        position: newPosition,
+                        map: map,
+                        title: location.name,
+                        animation: google.maps.Animation.DROP
+                    });
+
+                    map.panTo(newPosition);
+                    map.setZoom(12);
+
+                    successful++;
+                    batchResults.push(`✅ ${location.name}: Success`);
+                    logDebug(`${location.name}: Navigation successful`);
+
+                    // Wait between tests
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+                } catch (error) {
+                    failed++;
+                    batchResults.push(`❌ ${location.name}: ${error.message}`);
+                    logDebug(`${location.name}: Navigation failed - ${error.message}`);
+                }
+            }
+
+            const successRate = Math.round((successful / testLocations.length) * 100);
+
+            let html = `
+                <div class="status ${successRate === 100 ? 'success' : 'error'}">
+                    🧪 Batch Test Complete: ${successful}/${testLocations.length} successful (${successRate}%)
+                </div>
+                <div style="margin-top: 10px;">
+                    ${batchResults.map(result => `<div style="margin: 5px 0; padding: 5px; background: #f8f9fa; border-radius: 3px;">${result}</div>`).join('')}
+                </div>
+            `;
+
+            results.innerHTML = html;
+            logDebug(`Batch test completed: ${successRate}% success rate`);
+        }
+
+        // Clear debug output
+        function clearDebugOutput() {
+            debugMessages = [];
+            document.getElementById('debugOutput').innerHTML = 'Debug messages will appear here...';
+            logDebug('Debug output cleared');
+        }
+
+        // Auto-check system status on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                checkSystemStatus();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -558,6 +558,313 @@ app.get('/api/market', (req, res) => {
     }
 });
 
+// ===== KASHTKAR.AI AUTHENTICATION API =====
+
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        console.log('🔐 Login attempt:', req.body.usernameOrEmail);
+
+        const { usernameOrEmail, password } = req.body;
+
+        if (!usernameOrEmail || !password) {
+            return res.status(400).json({ error: 'Username/Email and password are required' });
+        }
+
+        // For demo purposes, accept any username/email and password combination
+        // In production, this would validate against a database
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        }
+
+        // Determine if input is email or username
+        const isEmail = usernameOrEmail.includes('@');
+        const identifier = isEmail ? 'email' : 'username';
+
+        // Create user object
+        const user = {
+            id: 'user_' + Date.now(),
+            [identifier]: usernameOrEmail,
+            email: isEmail ? usernameOrEmail : `${usernameOrEmail}@kashtkar.ai`,
+            name: isEmail ? usernameOrEmail.split('@')[0] : usernameOrEmail,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(isEmail ? usernameOrEmail.split('@')[0] : usernameOrEmail)}&background=1a73e8&color=ffffff&size=128`,
+            role: 'farmer',
+            joinDate: new Date().toISOString()
+        };
+
+        // Create JWT token (in production, use proper JWT library)
+        const token = 'kashtkar_token_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        console.log('✅ Login successful for:', usernameOrEmail);
+
+        res.json({
+            success: true,
+            user: user,
+            token: token,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString() // 24 hours
+        });
+
+    } catch (error) {
+        console.error('❌ Login error:', error);
+        res.status(500).json({
+            error: 'Authentication failed',
+            details: error.message
+        });
+    }
+});
+
+app.post('/api/auth/google', async (req, res) => {
+    try {
+        console.log('🔐 Google Sign-In attempt');
+
+        const { token } = req.body;
+
+        if (!token) {
+            return res.status(400).json({ error: 'Google token is required' });
+        }
+
+        // In production, verify the Google token here
+        // For demo, we'll simulate successful authentication
+        const decodedToken = {
+            email: 'demo@kashtkar.ai',
+            name: 'Demo User',
+            picture: 'https://ui-avatars.com/api/?name=Demo+User&background=34a853&color=ffffff&size=128'
+        };
+
+        const user = {
+            id: 'google_user_' + Date.now(),
+            email: decodedToken.email,
+            name: decodedToken.name,
+            avatar: decodedToken.picture,
+            role: 'farmer',
+            joinDate: new Date().toISOString(),
+            authProvider: 'google'
+        };
+
+        const authToken = 'kashtkar_google_token_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        console.log('✅ Google Sign-In successful for:', decodedToken.email);
+
+        res.json({
+            success: true,
+            user: user,
+            token: authToken,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+        });
+
+    } catch (error) {
+        console.error('❌ Google auth error:', error);
+        res.status(500).json({
+            error: 'Google authentication failed',
+            details: error.message
+        });
+    }
+});
+
+app.post('/api/auth/register', async (req, res) => {
+    try {
+        console.log('📝 Registration attempt:', req.body.email);
+
+        const { email, password, name } = req.body;
+
+        if (!email || !password || !name) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
+
+        if (password.length < 6) {
+            return res.status(400).json({ error: 'Password must be at least 6 characters' });
+        }
+
+        // Create user object
+        const user = {
+            id: 'user_' + Date.now(),
+            email: email,
+            name: name,
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=1a73e8&color=ffffff&size=128`,
+            role: 'farmer',
+            joinDate: new Date().toISOString()
+        };
+
+        const token = 'kashtkar_token_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        console.log('✅ Registration successful for:', email);
+
+        res.json({
+            success: true,
+            user: user,
+            token: token,
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString()
+        });
+
+    } catch (error) {
+        console.error('❌ Registration error:', error);
+        res.status(500).json({
+            error: 'Registration failed',
+            details: error.message
+        });
+    }
+});
+
+app.get('/api/auth/verify', (req, res) => {
+    try {
+        const token = req.headers.authorization?.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ error: 'No token provided' });
+        }
+
+        // In production, verify JWT token here
+        // For demo, accept any token
+        if (token.startsWith('kashtkar_token_') || token.startsWith('kashtkar_google_token_')) {
+            const user = {
+                id: 'user_demo',
+                email: 'demo@kashtkar.ai',
+                name: 'Demo User',
+                role: 'farmer'
+            };
+
+            res.json({
+                valid: true,
+                user: user
+            });
+        } else {
+            res.status(401).json({ error: 'Invalid token' });
+        }
+
+    } catch (error) {
+        console.error('❌ Token verification error:', error);
+        res.status(500).json({
+            error: 'Token verification failed',
+            details: error.message
+        });
+    }
+});
+
+// ===== KASHTKAR.AI LOCATION PARSING API =====
+
+app.post('/api/location/parse', async (req, res) => {
+    try {
+        console.log('🔍 Location parsing API called with:', req.body);
+
+        const { query } = req.body;
+
+        if (!query) {
+            return res.status(400).json({ error: 'Query parameter is required' });
+        }
+
+        // Use Google AI Studio (Gemini) to parse natural language location queries
+        const locationData = await parseLocationWithGemini(query);
+
+        if (locationData) {
+            console.log('✅ Location parsed successfully:', locationData);
+            res.json(locationData);
+        } else {
+            // Fallback to simple geocoding
+            console.log('⚠️ Gemini parsing failed, using fallback');
+            const fallbackData = await fallbackLocationParsing(query);
+            res.json(fallbackData || { error: 'Location not found' });
+        }
+
+    } catch (error) {
+        console.error('❌ Location parsing error:', error);
+        res.status(500).json({
+            error: 'Location parsing failed',
+            details: error.message
+        });
+    }
+});
+
+// Parse location using Google AI Studio (Gemini)
+async function parseLocationWithGemini(query) {
+    try {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=AIzaSyCbf_5WdnRUQFW-Bc4ay3lbuBH6shVemFE`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{
+                        text: `Extract the geographic location from this query and return ONLY a JSON object with latitude and longitude. Focus on farm/agricultural locations. Return format: {"latitude": 31.5204, "longitude": 74.3587, "placeName": "Lahore, Punjab"}. Query: "${query}"`
+                    }]
+                }],
+                generationConfig: {
+                    temperature: 0.1,
+                    maxOutputTokens: 100
+                }
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`Gemini API error: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.candidates && data.candidates[0] && data.candidates[0].content) {
+            const aiResponse = data.candidates[0].content.parts[0].text.trim();
+
+            try {
+                // Try to parse the JSON response
+                const locationResult = JSON.parse(aiResponse);
+
+                if (locationResult.latitude && locationResult.longitude) {
+                    return {
+                        latitude: parseFloat(locationResult.latitude),
+                        longitude: parseFloat(locationResult.longitude),
+                        placeName: locationResult.placeName || 'Unknown Location',
+                        confidence: 'high',
+                        source: 'gemini_ai'
+                    };
+                }
+            } catch (parseError) {
+                console.warn('⚠️ Failed to parse Gemini response as JSON:', aiResponse);
+            }
+        }
+
+        return null;
+
+    } catch (error) {
+        console.error('❌ Gemini location parsing failed:', error);
+        return null;
+    }
+}
+
+// Fallback location parsing using simple keyword matching
+async function fallbackLocationParsing(query) {
+    const lowerQuery = query.toLowerCase();
+
+    // Pakistani cities and agricultural regions
+    const knownLocations = {
+        'lahore': { lat: 31.5204, lng: 74.3587, name: 'Lahore, Punjab' },
+        'karachi': { lat: 24.8607, lng: 67.0011, name: 'Karachi, Sindh' },
+        'islamabad': { lat: 33.6846, lng: 73.0479, name: 'Islamabad' },
+        'rawalpindi': { lat: 33.5651, lng: 73.0169, name: 'Rawalpindi, Punjab' },
+        'peshawar': { lat: 34.0151, lng: 71.5249, name: 'Peshawar, KPK' },
+        'quetta': { lat: 30.1798, lng: 66.9750, name: 'Quetta, Balochistan' },
+        'multan': { lat: 30.1575, lng: 71.5249, name: 'Multan, Punjab' },
+        'faisalabad': { lat: 31.4504, lng: 73.1350, name: 'Faisalabad, Punjab' },
+        'punjab': { lat: 31.1704, lng: 72.7097, name: 'Punjab Province' },
+        'sindh': { lat: 25.8943, lng: 68.5247, name: 'Sindh Province' },
+        'khyber pakhtunkhwa': { lat: 34.9526, lng: 72.3311, name: 'Khyber Pakhtunkhwa' },
+        'balochistan': { lat: 28.4907, lng: 65.0960, name: 'Balochistan Province' }
+    };
+
+    // Check for known locations
+    for (const [key, location] of Object.entries(knownLocations)) {
+        if (lowerQuery.includes(key)) {
+            return {
+                latitude: location.lat,
+                longitude: location.lng,
+                placeName: location.name,
+                confidence: 'medium',
+                source: 'keyword_matching'
+            };
+        }
+    }
+
+    return null;
+}
+
 // Helper functions
 function generateExecutiveSummary(data) {
     const { predictions, resourceAllocation, marketAnalysis } = data;
@@ -627,10 +934,10 @@ function generateAlerts(data) {
 }
 
 // Initialize and start server
-initializeAgriSwarm();
+initializeKashtkarAI();
 
 app.listen(PORT, () => {
-    console.log(`🌟 AgriSwarm Backend Server running on port ${PORT}`);
+    console.log(`🌾 Kashtkar.ai Backend Server running on port ${PORT}`);
     console.log(`📡 API endpoints available:`);
     console.log(`   GET /api/status - System status`);
     console.log(`   GET /api/run - Full workflow`);
@@ -638,6 +945,12 @@ app.listen(PORT, () => {
     console.log(`   GET /api/predictions - AI predictions`);
     console.log(`   GET /api/resources - Resource allocation`);
     console.log(`   GET /api/market - Market analysis`);
+    console.log(`   POST /api/auth/login - User login`);
+    console.log(`   POST /api/auth/register - User registration`);
+    console.log(`   POST /api/auth/google - Google OAuth`);
+    console.log(`   POST /api/auth/demo - Demo login (bypass auth)`);
+    console.log(`   GET /api/auth/verify - Token verification`);
+    console.log(`   POST /api/location/parse - AI location parsing`);
     console.log(`🚀 Ready to serve frontend requests!`);
 });
 
