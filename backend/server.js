@@ -934,7 +934,7 @@ function generateAlerts(data) {
 }
 
 // Initialize and start server
-initializeKashtkarAI();
+initializeAgriSwarm();
 
 app.listen(PORT, () => {
     console.log(`🌾 Kashtkar.ai Backend Server running on port ${PORT}`);

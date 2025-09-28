@@ -1045,7 +1045,6 @@
     <!-- App Bar -->
     <div class="app-bar">
         <div class="app-bar-left">
-            <div class="status-indicator"></div>
             <div class="app-logo">K</div>
             <div>
                 <div class="app-title">Kashtkar.ai</div>
@@ -1339,7 +1338,7 @@
                 }
 
                 // Check for demo token (easy bypass)
-                if (token === 'demo_token_active' || token.startsWith('kashtkar_demo_token_')) {
+                if (token === 'demo_token_active' || token.startsWith('kashtkar_demo_token_') || token.startsWith('kashtkar_token_')) {
                     console.log('🎭 Demo token detected, allowing access');
                     if (userData) {
                         try {

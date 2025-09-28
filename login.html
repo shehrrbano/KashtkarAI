@@ -75,9 +75,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(26, 115, 232, 0.8) 0%, rgba(52, 168, 83, 0.6) 100%),
-                        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800"><defs><linearGradient id="skyGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23ffd89b"/><stop offset="100%" stop-color="%23195973"/></linearGradient><linearGradient id="fieldGrad" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" stop-color="%23ffd89b"/><stop offset="100%" stop-color="%23d4a574"/></linearGradient></defs><rect width="1200" height="400" fill="url(%23skyGrad)"/><rect y="400" width="1200" height="400" fill="url(%23fieldGrad)"/><g opacity="0.9"><rect x="100" y="450" width="1000" height="20" fill="%23d4a574" opacity="0.3"/><rect x="150" y="470" width="900" height="15" fill="%23c4a564" opacity="0.4"/><rect x="200" y="485" width="800" height="12" fill="%23b4a554" opacity="0.5"/></g><g opacity="0.7"><rect x="300" y="350" width="8" height="80" fill="%23654321"/><rect x="320" y="340" width="12" height="90" fill="%23654321"/><rect x="340" y="360" width="6" height="70" fill="%23654321"/><rect x="360" y="345" width="10" height="85" fill="%23654321"/><rect x="380" y="355" width="7" height="75" fill="%23654321"/></g><circle cx="600" cy="200" r="80" fill="%23ffd700" opacity="0.8"/><g transform="translate(550,150)"><path d="M0,40 Q20,10 40,40 Q60,10 80,40 Q60,70 40,40 Q20,70 0,40" fill="%23ffffe0" opacity="0.9"/><animateTransform attributeName="transform" type="rotate" values="0 40 40;360 40 40" dur="20s" repeatCount="indefinite"/></g></svg>') center/cover;
-            opacity: 0.3;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><defs><radialGradient id="grad"><stop offset="0%" stop-color="rgba(255,255,255,0.1)"/><stop offset="100%" stop-color="rgba(255,255,255,0)"/></radialGradient></defs><circle cx="200" cy="300" r="250" fill="url(%23grad)"/><circle cx="800" cy="200" r="300" fill="url(%23grad)"/><circle cx="400" cy="800" r="200" fill="url(%23grad)"/></svg>') center/cover;
         }
 
         .hero-content {
@@ -409,12 +407,8 @@
         <!-- Left Panel - Hero Section -->
         <div class="left-panel">
             <div class="hero-content">
-                <h1 class="hero-title">Create your free account</h1>
+                <h1 class="hero-title">Login to Your Account</h1>
                 <p class="hero-subtitle">Explore Kashtkar.ai's core features for individuals and organizations.</p>
-                <a href="#" class="hero-link">
-                    See what's included
-                    <span class="material-icons" style="font-size: 16px;">arrow_forward</span>
-                </a>
             </div>
         </div>
 
@@ -423,7 +417,7 @@
             <a href="signup.html" class="signin-link">Don't have an account? Create Account →</a>
 
             <div class="auth-header">
-                <h2 class="auth-title">Sign up for Kashtkar.ai</h2>
+                <h2 class="auth-title">Sign in to Kashtkar.ai</h2>
             </div>
 
             <div id="errorMessage" class="error-message"></div>
@@ -504,46 +498,62 @@
                 return;
             }
 
+            // Demo credentials that always work (for demonstration purposes)
+            const demoCredentials = [
+                { username: 'demo', password: 'demo123', name: 'Demo Farmer', email: 'demo@kashtkar.ai' },
+                { username: 'admin', password: 'admin123', name: 'Admin User', email: 'admin@kashtkar.ai' },
+                { username: 'farmer', password: 'farmer123', name: 'Test Farmer', email: 'farmer@kashtkar.ai' },
+                { username: 'user', password: 'user123', name: 'Regular User', email: 'user@kashtkar.ai' }
+            ];
+
             // Show loading state
             const originalText = loginBtn.innerHTML;
             loginBtn.innerHTML = '<div class="loading"></div> Signing In...';
             loginBtn.disabled = true;
 
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        usernameOrEmail: usernameOrEmail,
-                        password: password
-                    })
-                });
+                // Check if credentials match demo credentials
+                const validCredential = demoCredentials.find(cred =>
+                    (cred.username === usernameOrEmail || cred.email === usernameOrEmail) &&
+                    cred.password === password
+                );
 
-                const data = await response.json();
+                if (validCredential) {
+                    // Create demo user and token
+                    const demoUser = {
+                        id: 'demo_user_' + Date.now(),
+                        name: validCredential.name,
+                        email: validCredential.email,
+                        role: 'farmer',
+                        isDemo: true,
+                        avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(validCredential.name)}&background=34a853&color=ffffff&size=128`
+                    };
 
-                if (response.ok) {
+                    const demoToken = 'kashtkar_demo_token_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
                     authState.isAuthenticated = true;
-                    authState.user = data.user;
-                    authState.token = data.token;
+                    authState.user = demoUser;
+                    authState.token = demoToken;
 
                     showSuccess('Login successful! Redirecting...');
 
                     // Store token in localStorage
-                    localStorage.setItem('kashtkar_token', data.token);
-                    localStorage.setItem('kashtkar_user', JSON.stringify(data.user));
+                    localStorage.setItem('kashtkar_token', demoToken);
+                    localStorage.setItem('kashtkar_user', JSON.stringify(demoUser));
 
                     // Redirect to main app after delay
                     setTimeout(() => {
                         window.location.href = 'frontend.html';
                     }, 1500);
                 } else {
-                    showError(data.error || 'Login failed');
+                    showError('Invalid credentials. Try: demo/demo123, admin/admin123, farmer/farmer123, or user/user123');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                showError('Network error. Please try again.');
+                showError('Login failed. Please try again.');
             } finally {
                 loginBtn.innerHTML = originalText;
                 loginBtn.disabled = false;
@@ -559,30 +569,32 @@
             loginBtn.innerHTML = '<div class="loading"></div> Starting Demo...';
             loginBtn.disabled = true;
 
+            // Simulate API delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             try {
-                const response = await fetch('/api/auth/demo', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    }
-                });
+                // Use default demo credentials
+                const demoUser = {
+                    id: 'demo_user_' + Date.now(),
+                    name: 'Demo Farmer',
+                    email: 'demo@kashtkar.ai',
+                    role: 'farmer',
+                    isDemo: true,
+                    avatar: 'https://ui-avatars.com/api/?name=Demo+Farmer&background=34a853&color=ffffff&size=128'
+                };
 
-                const data = await response.json();
+                const demoToken = 'kashtkar_demo_token_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
-                if (response.ok) {
-                    showSuccess('Demo login successful! Redirecting...');
+                showSuccess('Demo login successful! Redirecting...');
 
-                    // Store demo token in localStorage
-                    localStorage.setItem('kashtkar_token', data.token);
-                    localStorage.setItem('kashtkar_user', JSON.stringify(data.user));
+                // Store demo token in localStorage
+                localStorage.setItem('kashtkar_token', demoToken);
+                localStorage.setItem('kashtkar_user', JSON.stringify(demoUser));
 
-                    // Redirect to main app after delay
-                    setTimeout(() => {
-                        window.location.href = 'frontend.html';
-                    }, 1500);
-                } else {
-                    showError(data.error || 'Demo login failed');
-                }
+                // Redirect to main app after delay
+                setTimeout(() => {
+                    window.location.href = 'frontend.html';
+                }, 1500);
             } catch (error) {
                 console.error('Demo login error:', error);
                 showError('Demo login failed. Please try again.');
